@@ -23,7 +23,7 @@ def process_conditions():
     """
     # --------------------
     print("Processing " + utils.FILE_CONDITIONS+utils.FILE_EXTENSION)
-    modfile_out = open(utils.FILE_CONDITIONS + "_mod" + utils.FILE_EXTENSION, 'w')
+    modfile_out = open(utils.MOD_FILE + utils.FILE_EXTENSION, 'w')
     modfile_out.write(user.UserSPOC.get_headers(utils.DELIMITER) + "\n")
 
     with open(utils.FILE_CONDITIONS+utils.FILE_EXTENSION, 'r') as csvfile:

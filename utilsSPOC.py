@@ -15,6 +15,7 @@ CONST_SWITCH_DAY = datetime.date(2015, 4, 11)  # the day prompting conditions sw
 # constants
 FILE_CONDITIONS = "150404_spoc_full_data"
 FILE_POSTS = "150404_spoc_comment_data"  # TODO: not yet received
+MOD_FILE = FILE_CONDITIONS + "_mod"
 LDA_FILE = FILE_CONDITIONS + "_lda"
 FILE_EXTENSION = ".csv"
 DELIMITER = ","
@@ -58,3 +59,5 @@ COND_VOTE_NONE = "NOVOTE_GROUP"
 COND_VOTE_UP = "UPVOTE_GROUP"
 COND_PROMPT_POS = "POSITIVE"
 COND_PROMPT_NEUTRAL = "NEUTRAL"
+
+FORMAT_LINE = "--------------------"
