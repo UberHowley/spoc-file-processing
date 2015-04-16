@@ -20,8 +20,6 @@ def run():
     except OSError as e:
         print("ERROR: " +utils.MOD_FILE+utils.FILE_EXTENSION + " does not exist. Did you run logfileSPOC.py?")
 
-    anova_interaction(data)
-
     user_input = input("> Print descriptive statistics? [y/n]: ")
     if is_yes(user_input):
         descriptive_stats(data)
@@ -149,8 +147,8 @@ def anova_interaction(data):
     voting_nospc = utils.COL_VOTING.replace(' ', '')
     num_comments_nospc = utils.COL_NUM_COMMENTS.replace(' ', '')  # remove spaces from our outcome variable
 
-    factor_groups = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]]  # need a separate dataframe to rm spaces from col names
-    factor_groups.rename(columns=lambda x: x.replace(' ', ''), inplace=True)  # remove spaces from column names
+    factor_groups = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]].dropna()  # need a separate dataframe to rm spaces from col names
+    factor_groups.rename(columns=lambda x: x.replace(' ', ''), inplace=True)  # remove spaces from column names (throws a warning)
 
     # two-way anova
     formula = num_comments_nospc + " ~ C(" + prompts_nospc+'0' + ") + C(" + voting_nospc + ")"
@@ -172,14 +170,11 @@ def anova_interaction(data):
 
     # interaction plot
     user_input = input(">> Display Interaction plot? [y/n]: ")
-    # TODO: This doesn't work yet!
-    '''
-    print("ERROR: TODO: This doesn't work yet.")
+
     if is_yes(user_input):
         plt.figure(figsize=(6, 6))
-        interaction_plot(factor_groups[prompts_nospc+'0'], factor_groups[voting_nospc], factor_groups[num_comments_nospc], colors=['red', 'blue'], markers=['D', '^'], ms=10, ax=plt.gca())
+        interaction_plot(factor_groups[voting_nospc], factor_groups[prompts_nospc+'0'], factor_groups[num_comments_nospc], colors=['red', 'blue', 'green'], markers=['D', '^', 'o'], ms=10, ax=plt.gca())
         plt.show()
-    '''
 
 def compare_plot_helpers(data):
     """
