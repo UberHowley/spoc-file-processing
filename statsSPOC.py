@@ -145,7 +145,7 @@ def t_test(data):
     :param data: data frame containing the independent and dependent variables
     :return: None
     """
-    conditions = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
+    conditions = [utils.COL_VOTING, utils.COL_PROMPTS]
     # utils.COL_VERSION -> has 'TA' and 'student' instead of 'y' and 'n'
 
     fig = plt.figure()
@@ -181,8 +181,8 @@ def one_way_anova(data):
     :param data: data frame containing the independent and dependent variables
     :return: None
     """
-    conditions = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
-    linear_df = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]]
+    conditions = [utils.COL_VOTING, utils.COL_PROMPTS]
+    linear_df = data[[utils.COL_VOTING, utils.COL_PROMPTS, utils.COL_NUM_COMMENTS]]
 
     fig = plt.figure()
     i = 1
@@ -220,25 +220,25 @@ def anova_interaction(data):
     :return: None
     """
 
-    factor_groups = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]].dropna()
+    factor_groups = data[[utils.COL_VOTING, utils.COL_PROMPTS, utils.COL_NUM_COMMENTS]].dropna()
 
     # two-way anova
-    formula = utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_PROMPTS+'0' + ") + C(" + utils.COL_VOTING + ")"
+    formula = utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_PROMPTS + ") + C(" + utils.COL_VOTING + ")"
     formula_interaction = formula.replace('+', '*')
     badge_vote_lm = ols(formula, data=factor_groups).fit()  # linear model
     print(badge_vote_lm.summary())
 
     print(utils.FORMAT_LINE)
-    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS+'0' + " * " + utils.COL_VOTING + " Interaction -")
+    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS + " * " + utils.COL_VOTING + " Interaction -")
     print(anova_lm(ols(formula_interaction, data=factor_groups).fit(), badge_vote_lm))
 
     print(utils.FORMAT_LINE)
-    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS+'0' + " + " + utils.COL_VOTING + " ANOVA -")
-    print(anova_lm(ols(utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_PROMPTS+'0' + ")", data=factor_groups).fit(), ols(utils.COL_NUM_COMMENTS +" ~ C("+utils.COL_PROMPTS+'0'+") + C(" + utils.COL_VOTING+", Sum)", data=factor_groups).fit()))
+    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS + " + " + utils.COL_VOTING + " ANOVA -")
+    print(anova_lm(ols(utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_PROMPTS + ")", data=factor_groups).fit(), ols(utils.COL_NUM_COMMENTS +" ~ C("+utils.COL_PROMPTS+") + C(" + utils.COL_VOTING+", Sum)", data=factor_groups).fit()))
 
     print(utils.FORMAT_LINE)
-    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS+'0' + " + " + utils.COL_VOTING + " ANOVA -")
-    print(anova_lm(ols(utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_VOTING + ")", data=factor_groups).fit(), ols(utils.COL_NUM_COMMENTS +" ~ C("+utils.COL_PROMPTS+'0'+") + C(" + utils.COL_VOTING+", Sum)", data=factor_groups).fit()))
+    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS + " + " + utils.COL_VOTING + " ANOVA -")
+    print(anova_lm(ols(utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_VOTING + ")", data=factor_groups).fit(), ols(utils.COL_NUM_COMMENTS +" ~ C("+utils.COL_PROMPTS+") + C(" + utils.COL_VOTING+", Sum)", data=factor_groups).fit()))
 
     # interaction plot
     user_input = input(">> Display Interaction plot? [y/n]: ")
@@ -248,10 +248,10 @@ def anova_interaction(data):
         plt.figure()
 
         plt.subplot(121)
-        interaction_plot(factor_groups[utils.COL_VOTING], factor_groups[utils.COL_PROMPTS+'0'], factor_groups[utils.COL_NUM_COMMENTS], colors=['red', 'blue', 'green'], markers=['D', '^', 'o'], ms=10, ax=plt.gca())
+        interaction_plot(factor_groups[utils.COL_VOTING], factor_groups[utils.COL_PROMPTS], factor_groups[utils.COL_NUM_COMMENTS], colors=['red', 'blue', 'green'], markers=['D', '^', 'o'], ms=10, ax=plt.gca())
 
         plt.subplot(122)
-        factor_groups.boxplot(return_type='axes', column=utils.COL_NUM_COMMENTS, by=[utils.COL_PROMPTS+'0', utils.COL_VOTING])
+        factor_groups.boxplot(return_type='axes', column=utils.COL_NUM_COMMENTS, by=[utils.COL_PROMPTS, utils.COL_VOTING])
         plt.show()
 
 def compare_plot_helpers(data):
@@ -261,7 +261,7 @@ def compare_plot_helpers(data):
     :return: None
     """
     # TODO: These should be box plots, not bar plots
-    conditions = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
+    conditions = [utils.COL_VOTING, utils.COL_PROMPTS]
     fig = plt.figure()
     i = 1
     for cond in conditions:
@@ -280,7 +280,7 @@ def compare_plot_instances(data):
     :param data: pandas dataframe we are exploring
     :return: None
     """
-    conditions = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
+    conditions = [utils.COL_VOTING, utils.COL_PROMPTS]
     fig = plt.figure()
     i = 1
     for cond in conditions:
@@ -337,7 +337,7 @@ def descriptive_stats(data):
     # Descriptive Statistics of conditions
     print(utils.FORMAT_LINE)
     print("Descriptive statistics for: all conditions")
-    conditions = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
+    conditions = [utils.COL_VOTING, utils.COL_PROMPTS]
     print(data.describe())
     df_conditions = data[conditions]
     print(df_conditions.describe())

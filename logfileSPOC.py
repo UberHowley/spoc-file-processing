@@ -35,8 +35,7 @@ def process_conditions():
             user_id = array_line[cleaned_headers.index(utils.COL_ID)]
             num_comments = array_line[cleaned_headers.index(utils.COL_NUM_COMMENTS)]
             voting_cond = array_line[cleaned_headers.index(utils.COL_VOTING)]
-            prompting_cond1 = array_line[cleaned_headers.index(utils.COL_PROMPTS)]
-            #prompting_cond2 = array_line[cleaned_headers.index(utils.COL_PROMPTS2)]  # TODO: not yet in dataset
+            prompting_cond = array_line[cleaned_headers.index(utils.COL_PROMPTS)]
             #num_prompts = array_line[cleaned_headers.index(utils.COL_NUM_PROMPTS)]  # TODO: not yet in dataset
             num_upvotes = array_line[cleaned_headers.index(utils.COL_NUM_UPVOTES)]
             num_downvotes = array_line[cleaned_headers.index(utils.COL_NUM_DOWNVOTES)]
@@ -59,7 +58,7 @@ def process_conditions():
             midterm = array_line[cleaned_headers.index(utils.COL_MIDTERM)]
             #final = array_line[cleaned_headers.index(utils.COL_FINAL)]  # TODO: not yet in dataset
 
-            new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond1, "TODO", -1, num_upvotes, num_downvotes, assignments, assignment_lates, exams, midterm, "TODO", exercises)
+            new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, -1, num_upvotes, num_downvotes, assignments, assignment_lates, exams, midterm, "TODO", exercises)
 
             # removing students from list
             if user_id not in utils.DROP_STUDENTS:
@@ -115,16 +114,7 @@ def process_comments():
                 line += "" + utils.DELIMITER + ""
             else:
                 line += getattr(all_users[user_id], 'voting_cond')
-                # determine what prompting condition this happened under
-
-                '''
-                # TODO: may not be necessary?
-                prompt = 1
-                if not is_before_switch(get_timestamp(tstamp)):
-                    prompt = 2
-                line += utils.DELIMITER + getattr(all_users[user_id], 'prompting_cond'+str(prompt))
-                '''
-                line += utils.DELIMITER + getattr(all_users[user_id], 'prompting_cond1')
+                line += utils.DELIMITER + getattr(all_users[user_id], 'prompting_cond')
 
             file_out.write(line + '\n')
         csvfile.close()
@@ -143,14 +133,6 @@ def get_timestamp(tstamp):
     except ValueError as err:
         print(tstamp, err)
     return tstamp
-
-def is_before_switch(instance_date):
-    """
-    Determine if given date occurred before we switched prompting conditions
-    :param instance_date: date to check if it's in range
-    :return: True if given date is in our restricted time range
-    """
-    return instance_date < utils.CONST_SWITCH_DAY
 
 if __name__ == '__main__':
     print("Running logfileSPOC")

@@ -11,8 +11,7 @@ class UserSPOC(object):
     num_comments = 0
     voting_cond = ""
     any_vote_condition = ""
-    prompting_cond1 = ""  # prompting condition for the first half
-    prompting_cond2 = ""  # prompting condition for the second half
+    prompting_cond = ""
     num_prompts = 0
     num_upvotes = 0
     num_downvotes = 0
@@ -23,14 +22,13 @@ class UserSPOC(object):
     final = -1
     exercises = []
 
-    def __init__(self, uid, nc, vc, pc1, pc2, np, up, down, assi, asl, e, mt, f, exc):
+    def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, e, mt, f, exc):
         """
 
         :param uid: user id
         :param nc: number of comments
         :param vc: voting condition
-        :param pc1: first prompting condition
-        :param pc2: second prompting condition
+        :param pc: first prompting condition
         :param np: number of prompts received
         :param up: number of upvotes
         :param down: number of downvotes
@@ -45,8 +43,7 @@ class UserSPOC(object):
         self.user_id = uid
         self.num_comments = nc
         self.voting_cond = vc
-        self.prompting_cond1 = pc1
-        self.prompting_cond2 = pc2
+        self.prompting_cond = pc
         self.num_prompts = np
         self.num_upvotes = up
         self.num_downvotes = down
@@ -70,7 +67,7 @@ class UserSPOC(object):
         """
         line = str(self.user_id) + delimiter + str(self.num_comments) + delimiter + self.voting_cond + delimiter
         line += self.any_vote_condition + delimiter
-        line += self.prompting_cond1 + delimiter + self.prompting_cond2 + delimiter + str(self.num_prompts) + delimiter
+        line += self.prompting_cond + delimiter + str(self.num_prompts) + delimiter
         line += str(self.num_upvotes) + delimiter
         line += str(self.num_downvotes)
         for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment scores
@@ -91,7 +88,7 @@ class UserSPOC(object):
         """
         line = utils.COL_ID + delimiter + utils.COL_NUM_COMMENTS + delimiter
         line += utils.COL_VOTING + delimiter + utils.COL_ANY_VOTE + delimiter
-        line += utils.COL_PROMPTS+"0" + delimiter + utils.COL_PROMPTS+"1" + delimiter + utils.COL_NUM_PROMPTS + delimiter
+        line += utils.COL_PROMPTS + delimiter + utils.COL_NUM_PROMPTS + delimiter
         line += utils.COL_NUM_UPVOTES + delimiter + utils.COL_NUM_DOWNVOTES + delimiter
         for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment headers
             line += utils.COL_ASSIGNMENTS[i] + delimiter + utils.COL_ASSIGN_LATE[i] + delimiter
