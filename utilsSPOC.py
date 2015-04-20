@@ -27,10 +27,10 @@ DROP_STUDENTS = [15, 78, 105, 133, 181]
 # 15, 78, and 105 are not enrolled in the course
 
 # column headers (as written in the in-file)
+# Note: I've removed the spaces from all of these at read-in.
 COL_ID = "id"
 COL_VOTING = "Condition"
 COL_PROMPTS = "EncouragementType"
-COL_PROMPTS2 = "TODO_prompts2"  # TODO: Column header for prompts after the switch?
 COL_NUM_PROMPTS = "TODO_numPrompts"  # TODO: where's number of prompts user received?
 COL_NUM_COMMENTS = "NumComments"
 COL_NUM_UPVOTES = "NumUpvotes"

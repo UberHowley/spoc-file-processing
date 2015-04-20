@@ -27,7 +27,7 @@ def run():
     except OSError as e:
         print("ERROR: " +utils.MOD_FILE+utils.FILE_EXTENSION + " does not exist. Did you run logfileSPOC.py?")
 
-    #cluster(data)
+    cluster(data)
 
     user_input = input("> Print descriptive statistics? [y/n]: ")
     if is_yes(user_input):
@@ -72,46 +72,33 @@ def cluster(data):
     :param data: the data loaded into a DataFrame
     :return:
     """
-    # TODO: Doesn't work yet
     # recoding our categorical variables as numerical values
-    cat_names = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
     int_prefix = "int_"
-    int_names = []
-    for name in cat_names:
-        new_name = int_prefix+name
-        cdata = data
-        int_names.append(new_name)
-        cdata[new_name] = pd.Categorical.from_array(cdata.Condition).labels
-    print(cdata.head())
-    cluster_data = data[int_names+[utils.COL_NUM_PROMPTS, utils.COL_NUM_COMMENTS, utils.COL_MIDTERM]]
-
-    print(cluster_data.head())
-
+    new_voting = int_prefix + utils.COL_VOTING
+    new_prompts = int_prefix + utils.COL_PROMPTS
+    data[new_voting] = pd.Categorical.from_array(data.Condition).codes
+    data[new_prompts] = pd.Categorical.from_array(data.EncouragementType).codes
+    cluster_data = data[[new_voting, new_prompts, utils.COL_NUM_PROMPTS, utils.COL_NUM_COMMENTS, utils.COL_MIDTERM]].dropna().astype(np.float64)
 
     # We run the following SciPy and NumPy code in [1]
     # and generate the plots mentioned above using Matplotlib
 
-    # load the UN dataset transformed to float with 4 numeric columns,
-    # lifeMale,lifeFemale,infantMortality and GDPperCapita
-
-    fName = (utils.MOD_FILE+utils.FILE_EXTENSION)
-    fp = open(fName)
-    X = np.loadtxt(fp)
-    fp.close()
+    # load the dataset transformed to float with 5 numeric columns,
+    # voting, prompts, numPrompts, numComments, midterm
+    X = cluster_data.values
 
     ##### cluster data into K=1..10 clusters #####
     #K, KM, centroids,D_k,cIdx,dist,avgWithinSS = kmeans.run_kmeans(X,10)
-
-    K = range(1,10)
+    K = range(1, 10)
 
     # scipy.cluster.vq.kmeans
-    KM = [kmeans(X,k) for k in K] # apply kmeans 1 to 10
-    centroids = [cent for (cent,var) in KM]   # cluster centroids
+    KM = [kmeans(X, k) for k in K]  # apply kmeans 1 to 10
+    centroids = [cent for (cent, var) in KM]   # cluster centroids
 
     D_k = [cdist(X, cent, 'euclidean') for cent in centroids]
 
-    cIdx = [np.argmin(D,axis=1) for D in D_k]
-    dist = [np.min(D,axis=1) for D in D_k]
+    cIdx = [np.argmin(D, axis=1) for D in D_k]
+    dist = [np.min(D, axis=1) for D in D_k]
     avgWithinSS = [sum(d)/X.shape[0] for d in dist]
 
     kIdx = 2
@@ -124,12 +111,14 @@ def cluster(data):
     plt.xlabel('Number of clusters')
     plt.ylabel('Average within-cluster sum of squares')
     tt = plt.title('Elbow for K-Means clustering')
+    plt.show()
 
     num_clusters = input("> How many clusters? ")
-    km = KMeans(int(num_clusters), init='k-means++') # initialize
+    km = KMeans(int(num_clusters), init='k-means++')  # initialize
     km.fit(X)
-    c = km.predict(X) # classify into three clusters
+    c = km.predict(X)  # classify into three clusters
 
+    # TODO: elbow plot works, now...
     # see the code in helper library kmeans.py
     # it wraps a number of variables and maps integers to categoriy labels
     # this wrapper makes it easy to interact with this code and try other variables
