@@ -172,8 +172,14 @@ def anova_interaction(data):
     user_input = input(">> Display Interaction plot? [y/n]: ")
 
     if is_yes(user_input):
-        plt.figure(figsize=(6, 6))
+        # TODO: fix the boxplot generating a separate plot (why doesn't subplots work?)
+        plt.figure()
+
+        plt.subplot(121)
         interaction_plot(factor_groups[voting_nospc], factor_groups[prompts_nospc+'0'], factor_groups[num_comments_nospc], colors=['red', 'blue', 'green'], markers=['D', '^', 'o'], ms=10, ax=plt.gca())
+
+        plt.subplot(122)
+        factor_groups.boxplot(column=num_comments_nospc, by=[prompts_nospc+'0', voting_nospc])
         plt.show()
 
 def compare_plot_helpers(data):
