@@ -5,15 +5,9 @@ import pandas as pd
 import utilsSPOC as utils
 import matplotlib.pyplot as plt
 from statsmodels.formula.api import ols
-from statsmodels.graphics.api import interaction_plot, abline_plot
+from statsmodels.graphics.api import interaction_plot
 from statsmodels.stats.anova import anova_lm
 from statsmodels.stats.weightstats import ttest_ind
-
-import numpy as np
-from scipy.cluster.vq import kmeans,vq
-from scipy.spatial.distance import cdist
-from sklearn.cluster import KMeans
-#import kmeans as mykm
 
 def run():
     """
@@ -26,8 +20,6 @@ def run():
         data = pd.io.parsers.read_csv(filename, encoding="utf-8-sig")
     except OSError as e:
         print("ERROR: " +utils.MOD_FILE+utils.FILE_EXTENSION + " does not exist. Did you run logfileSPOC.py?")
-
-    cluster(data)
 
     user_input = input("> Print descriptive statistics? [y/n]: ")
     if is_yes(user_input):
@@ -64,66 +56,6 @@ def is_yes(stri):
     :return: True if the string contains the letter 'y'
     """
     return 'y' in stri.lower()
-
-def cluster(data):
-    """
-    Trying out unsupervised clustering
-    http://nbviewer.ipython.org/github/nborwankar/LearnDataScience/blob/master/notebooks/D3.%20K-Means%20Clustering%20Analysis.ipynb
-    :param data: the data loaded into a DataFrame
-    :return:
-    """
-    # recoding our categorical variables as numerical values
-    int_prefix = "int_"
-    new_voting = int_prefix + utils.COL_VOTING
-    new_prompts = int_prefix + utils.COL_PROMPTS
-    data[new_voting] = pd.Categorical.from_array(data.Condition).codes
-    data[new_prompts] = pd.Categorical.from_array(data.EncouragementType).codes
-    cluster_data = data[[new_voting, new_prompts, utils.COL_NUM_PROMPTS, utils.COL_NUM_COMMENTS, utils.COL_MIDTERM]].dropna().astype(np.float64)
-
-    # We run the following SciPy and NumPy code in [1]
-    # and generate the plots mentioned above using Matplotlib
-
-    # load the dataset transformed to float with 5 numeric columns,
-    # voting, prompts, numPrompts, numComments, midterm
-    X = cluster_data.values
-
-    ##### cluster data into K=1..10 clusters #####
-    #K, KM, centroids,D_k,cIdx,dist,avgWithinSS = kmeans.run_kmeans(X,10)
-    K = range(1, 10)
-
-    # scipy.cluster.vq.kmeans
-    KM = [kmeans(X, k) for k in K]  # apply kmeans 1 to 10
-    centroids = [cent for (cent, var) in KM]   # cluster centroids
-
-    D_k = [cdist(X, cent, 'euclidean') for cent in centroids]
-
-    cIdx = [np.argmin(D, axis=1) for D in D_k]
-    dist = [np.min(D, axis=1) for D in D_k]
-    avgWithinSS = [sum(d)/X.shape[0] for d in dist]
-
-    kIdx = 2
-    # plot elbow curve
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    ax.plot(K, avgWithinSS, 'b*-')
-    ax.plot(K[kIdx], avgWithinSS[kIdx], marker='o', markersize=12, markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
-    plt.grid(True)
-    plt.xlabel('Number of clusters')
-    plt.ylabel('Average within-cluster sum of squares')
-    tt = plt.title('Elbow for K-Means clustering')
-    plt.show()
-
-    num_clusters = input("> How many clusters? ")
-    km = KMeans(int(num_clusters), init='k-means++')  # initialize
-    km.fit(X)
-    c = km.predict(X)  # classify into three clusters
-
-    # TODO: elbow plot works, now...
-    # see the code in helper library kmeans.py
-    # it wraps a number of variables and maps integers to categoriy labels
-    # this wrapper makes it easy to interact with this code and try other variables
-    # as we see below in the next plot
-    #(pl0,pl1,pl2) = mykm.plot_clusters(X,c,3,2) # column 3 GDP, vs column 2 infant mortality. Note indexing is 0 based
 
 def t_test(data):
     """
@@ -341,7 +273,7 @@ def descriptive_stats(data):
     print(utils.FORMAT_LINE)
 
 '''
-...So that statsMOOC can act as either a reusable module, or as a standalone program.
+...So that statsSPOC can act as either a reusable module, or as a standalone program.
 '''
 if __name__ == '__main__':
     run()
