@@ -9,16 +9,25 @@ from statsmodels.graphics.api import interaction_plot, abline_plot
 from statsmodels.stats.anova import anova_lm
 from statsmodels.stats.weightstats import ttest_ind
 
+import numpy as np
+from scipy.cluster.vq import kmeans,vq
+from scipy.spatial.distance import cdist
+from sklearn.cluster import KMeans
+#import kmeans as mykm
+
 def run():
     """
     run function - coordinates the main statistical analyses
     :return: None
     """
     # Exception handling in case the logfile doesn't exist
+    filename = utils.MOD_FILE+utils.FILE_EXTENSION
     try:
-        data = pd.io.parsers.read_csv(utils.MOD_FILE+utils.FILE_EXTENSION, encoding="utf-8-sig")
+        data = pd.io.parsers.read_csv(filename, encoding="utf-8-sig")
     except OSError as e:
         print("ERROR: " +utils.MOD_FILE+utils.FILE_EXTENSION + " does not exist. Did you run logfileSPOC.py?")
+
+    #cluster(data)
 
     user_input = input("> Print descriptive statistics? [y/n]: ")
     if is_yes(user_input):
@@ -55,6 +64,77 @@ def is_yes(stri):
     :return: True if the string contains the letter 'y'
     """
     return 'y' in stri.lower()
+
+def cluster(data):
+    """
+    Trying out unsupervised clustering
+    http://nbviewer.ipython.org/github/nborwankar/LearnDataScience/blob/master/notebooks/D3.%20K-Means%20Clustering%20Analysis.ipynb
+    :param data: the data loaded into a DataFrame
+    :return:
+    """
+    # TODO: Doesn't work yet
+    # recoding our categorical variables as numerical values
+    cat_names = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
+    int_prefix = "int_"
+    int_names = []
+    for name in cat_names:
+        new_name = int_prefix+name
+        cdata = data
+        int_names.append(new_name)
+        cdata[new_name] = pd.Categorical.from_array(cdata.Condition).labels
+    print(cdata.head())
+    cluster_data = data[int_names+[utils.COL_NUM_PROMPTS, utils.COL_NUM_COMMENTS, utils.COL_MIDTERM]]
+
+    print(cluster_data.head())
+
+
+    # We run the following SciPy and NumPy code in [1]
+    # and generate the plots mentioned above using Matplotlib
+
+    # load the UN dataset transformed to float with 4 numeric columns,
+    # lifeMale,lifeFemale,infantMortality and GDPperCapita
+
+    fName = (utils.MOD_FILE+utils.FILE_EXTENSION)
+    fp = open(fName)
+    X = np.loadtxt(fp)
+    fp.close()
+
+    ##### cluster data into K=1..10 clusters #####
+    #K, KM, centroids,D_k,cIdx,dist,avgWithinSS = kmeans.run_kmeans(X,10)
+
+    K = range(1,10)
+
+    # scipy.cluster.vq.kmeans
+    KM = [kmeans(X,k) for k in K] # apply kmeans 1 to 10
+    centroids = [cent for (cent,var) in KM]   # cluster centroids
+
+    D_k = [cdist(X, cent, 'euclidean') for cent in centroids]
+
+    cIdx = [np.argmin(D,axis=1) for D in D_k]
+    dist = [np.min(D,axis=1) for D in D_k]
+    avgWithinSS = [sum(d)/X.shape[0] for d in dist]
+
+    kIdx = 2
+    # plot elbow curve
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(K, avgWithinSS, 'b*-')
+    ax.plot(K[kIdx], avgWithinSS[kIdx], marker='o', markersize=12, markeredgewidth=2, markeredgecolor='r', markerfacecolor='None')
+    plt.grid(True)
+    plt.xlabel('Number of clusters')
+    plt.ylabel('Average within-cluster sum of squares')
+    tt = plt.title('Elbow for K-Means clustering')
+
+    num_clusters = input("> How many clusters? ")
+    km = KMeans(int(num_clusters), init='k-means++') # initialize
+    km.fit(X)
+    c = km.predict(X) # classify into three clusters
+
+    # see the code in helper library kmeans.py
+    # it wraps a number of variables and maps integers to categoriy labels
+    # this wrapper makes it easy to interact with this code and try other variables
+    # as we see below in the next plot
+    #(pl0,pl1,pl2) = mykm.plot_clusters(X,c,3,2) # column 3 GDP, vs column 2 infant mortality. Note indexing is 0 based
 
 def t_test(data):
     """
@@ -102,17 +182,14 @@ def one_way_anova(data):
     :return: None
     """
     conditions = [utils.COL_VOTING, utils.COL_PROMPTS+'0']
-    linear_df = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]]  # need a separate dataframe to rm spaces from col names
-    linear_df.rename(columns=lambda x: x.replace(' ', ''), inplace=True)  # remove spaces from column names
-    conditions = [cond.replace(' ', '') for cond in conditions]  # remove spaces from condition list
-    num_comments_nospc = utils.COL_NUM_COMMENTS.replace(' ', '')  # remove spaces from our outcome variable
+    linear_df = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]]
 
     fig = plt.figure()
     i = 1
 
     for cond in conditions:
-        cond_table = linear_df[[cond, num_comments_nospc]].dropna()
-        cond_lm = ols(num_comments_nospc + " ~ C(" + cond + ")", data=cond_table).fit()
+        cond_table = linear_df[[cond, utils.COL_NUM_COMMENTS]].dropna()
+        cond_lm = ols(utils.COL_NUM_COMMENTS + " ~ C(" + cond + ")", data=cond_table).fit()
         anova_table = anova_lm(cond_lm)
 
         print("\n"+utils.FORMAT_LINE)
@@ -123,9 +200,9 @@ def one_way_anova(data):
         print(cond_lm.summary())
 
         ax = fig.add_subplot(1, 2, i)
-        ax = cond_table.boxplot(num_comments_nospc, cond, ax=plt.gca())
+        ax = cond_table.boxplot(utils.COL_NUM_COMMENTS, cond, ax=plt.gca())
         ax.set_xlabel(cond)
-        ax.set_ylabel(num_comments_nospc)
+        ax.set_ylabel(utils.COL_NUM_COMMENTS)
         i += 1
     # box plot
     user_input = input(">> Display boxplot of conditions? [y/n]: ")
@@ -143,30 +220,25 @@ def anova_interaction(data):
     :return: None
     """
 
-    prompts_nospc = utils.COL_PROMPTS.replace(' ', '')
-    voting_nospc = utils.COL_VOTING.replace(' ', '')
-    num_comments_nospc = utils.COL_NUM_COMMENTS.replace(' ', '')  # remove spaces from our outcome variable
-
-    factor_groups = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]].dropna()  # need a separate dataframe to rm spaces from col names
-    factor_groups.rename(columns=lambda x: x.replace(' ', ''), inplace=True)  # remove spaces from column names (throws a warning)
+    factor_groups = data[[utils.COL_VOTING, utils.COL_PROMPTS+'0', utils.COL_NUM_COMMENTS]].dropna()
 
     # two-way anova
-    formula = num_comments_nospc + " ~ C(" + prompts_nospc+'0' + ") + C(" + voting_nospc + ")"
+    formula = utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_PROMPTS+'0' + ") + C(" + utils.COL_VOTING + ")"
     formula_interaction = formula.replace('+', '*')
     badge_vote_lm = ols(formula, data=factor_groups).fit()  # linear model
     print(badge_vote_lm.summary())
 
     print(utils.FORMAT_LINE)
-    print("- " + num_comments_nospc + " = " + prompts_nospc+'0' + " * " + voting_nospc + " Interaction -")
+    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS+'0' + " * " + utils.COL_VOTING + " Interaction -")
     print(anova_lm(ols(formula_interaction, data=factor_groups).fit(), badge_vote_lm))
 
     print(utils.FORMAT_LINE)
-    print("- " + num_comments_nospc + " = " + prompts_nospc+'0' + " + " + voting_nospc + " ANOVA -")
-    print(anova_lm(ols(num_comments_nospc + " ~ C(" + prompts_nospc+'0' + ")", data=factor_groups).fit(), ols(num_comments_nospc +" ~ C("+prompts_nospc+'0'+") + C(" + voting_nospc+", Sum)", data=factor_groups).fit()))
+    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS+'0' + " + " + utils.COL_VOTING + " ANOVA -")
+    print(anova_lm(ols(utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_PROMPTS+'0' + ")", data=factor_groups).fit(), ols(utils.COL_NUM_COMMENTS +" ~ C("+utils.COL_PROMPTS+'0'+") + C(" + utils.COL_VOTING+", Sum)", data=factor_groups).fit()))
 
     print(utils.FORMAT_LINE)
-    print("- " + num_comments_nospc + " = " + prompts_nospc+'0' + " + " + voting_nospc + " ANOVA -")
-    print(anova_lm(ols(num_comments_nospc + " ~ C(" + voting_nospc + ")", data=factor_groups).fit(), ols(num_comments_nospc +" ~ C("+prompts_nospc+'0'+") + C(" + voting_nospc+", Sum)", data=factor_groups).fit()))
+    print("- " + utils.COL_NUM_COMMENTS + " = " + utils.COL_PROMPTS+'0' + " + " + utils.COL_VOTING + " ANOVA -")
+    print(anova_lm(ols(utils.COL_NUM_COMMENTS + " ~ C(" + utils.COL_VOTING + ")", data=factor_groups).fit(), ols(utils.COL_NUM_COMMENTS +" ~ C("+utils.COL_PROMPTS+'0'+") + C(" + utils.COL_VOTING+", Sum)", data=factor_groups).fit()))
 
     # interaction plot
     user_input = input(">> Display Interaction plot? [y/n]: ")
@@ -176,10 +248,10 @@ def anova_interaction(data):
         plt.figure()
 
         plt.subplot(121)
-        interaction_plot(factor_groups[voting_nospc], factor_groups[prompts_nospc+'0'], factor_groups[num_comments_nospc], colors=['red', 'blue', 'green'], markers=['D', '^', 'o'], ms=10, ax=plt.gca())
+        interaction_plot(factor_groups[utils.COL_VOTING], factor_groups[utils.COL_PROMPTS+'0'], factor_groups[utils.COL_NUM_COMMENTS], colors=['red', 'blue', 'green'], markers=['D', '^', 'o'], ms=10, ax=plt.gca())
 
         plt.subplot(122)
-        factor_groups.boxplot(column=num_comments_nospc, by=[prompts_nospc+'0', voting_nospc])
+        factor_groups.boxplot(return_type='axes', column=utils.COL_NUM_COMMENTS, by=[utils.COL_PROMPTS+'0', utils.COL_VOTING])
         plt.show()
 
 def compare_plot_helpers(data):
