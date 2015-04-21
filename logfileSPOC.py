@@ -15,18 +15,18 @@ def run():
     process_conditions()
     process_comments()  # TODO: not yet received
 
-def process_conditions():
+def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
     """
     Calculate the average per-user accuracy (user’s percentage correct / total problems done)
     and user accuracy segmented by engagement level (by your categorization from the previous section). What trends do you see?
     :return: None
     """
     # --------------------
-    print("Processing " + utils.FILE_CONDITIONS+utils.FILE_EXTENSION)
+    print("Processing " + filename)
     modfile_out = open(utils.MOD_FILE + utils.FILE_EXTENSION, 'w')
     modfile_out.write(user.UserSPOC.get_headers(utils.DELIMITER) + "\n")
 
-    with open(utils.FILE_CONDITIONS+utils.FILE_EXTENSION, 'r') as csvfile:
+    with open(filename, 'r') as csvfile:
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]
@@ -67,17 +67,17 @@ def process_conditions():
 
     csvfile.close()
     modfile_out.close()
-    print("Done processing "+utils.FILE_CONDITIONS+utils.FILE_EXTENSION+"\n")
+    print("Done processing "+filename+"\n")
 
-def process_comments():
+def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
     """
     Parses a CSV file with the students' comments, user ids, and timestamps and assigns an automated topic.
     IMPORTANT: Either all commas must be removed from the comment text beforehand, or some unique delimiter
     must be used instead of commas.
     :return:
     """
-    print("Processing " + utils.FILE_POSTS+utils.FILE_EXTENSION)
-    with open(utils.FILE_POSTS+utils.FILE_EXTENSION, 'r') as csvfile:
+    print("Processing " + filename)
+    with open(filename, 'r') as csvfile:
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
@@ -87,7 +87,7 @@ def process_comments():
             comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
             if len(comment) > 0:
                 list_sentences.append(ldat.clean_string(comment))
-        print("Done processing "+utils.FILE_POSTS+utils.FILE_EXTENSION+"\n")
+        print("Done processing "+filename+"\n")
 
         # preparing to output LDA topic analysis stuff
         print("\tProcessing " + utils.LDA_FILE+utils.FILE_EXTENSION)
@@ -120,7 +120,7 @@ def process_comments():
         csvfile.close()
         file_out.close()
 
-    print("Done processing " + utils.LDA_FILE+utils.FILE_EXTENSION+"\n")
+    print("Done processing " + filename +"\n")
 
 def get_timestamp(tstamp):
     """

@@ -9,17 +9,16 @@ from statsmodels.graphics.api import interaction_plot
 from statsmodels.stats.anova import anova_lm
 from statsmodels.stats.weightstats import ttest_ind
 
-def run():
+def run(filename=utils.MOD_FILE+utils.FILE_EXTENSION):
     """
     run function - coordinates the main statistical analyses
     :return: None
     """
     # Exception handling in case the logfile doesn't exist
-    filename = utils.MOD_FILE+utils.FILE_EXTENSION
     try:
         data = pd.io.parsers.read_csv(filename, encoding="utf-8-sig")
     except OSError as e:
-        print("ERROR: " +utils.MOD_FILE+utils.FILE_EXTENSION + " does not exist. Did you run logfileSPOC.py?")
+        print("ERROR: " + filename + " does not exist. Did you run logfileSPOC.py?")
 
     user_input = input("> Print descriptive statistics? [y/n]: ")
     if is_yes(user_input):
@@ -34,7 +33,7 @@ def run():
 
     user_input = input("> Display comparison plots of conditions -> "+utils.COL_NUM_COMMENTS+"? [y/n]: ")
     if is_yes(user_input):
-        compare_plot_helpers(data)
+        compare_plot_comments(data)
 
     user_input = input("> Print t-test statistics for all conditions? [y/n]: ")
     if is_yes(user_input):
@@ -175,7 +174,7 @@ def anova_interaction(data):
         factor_groups.boxplot(return_type='axes', column=utils.COL_NUM_COMMENTS, by=[utils.COL_PROMPTS, utils.COL_VOTING])
         plt.show()
 
-def compare_plot_helpers(data):
+def compare_plot_comments(data):
     """
     Print comparison plots for given data frame
     :param data: pandas dataframe we are exploring
