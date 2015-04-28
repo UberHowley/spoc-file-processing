@@ -92,7 +92,7 @@ class LDAtopicModel(object):
     @staticmethod
     def clean_string(sentence):
         """
-        Clean the string by removing all punctuation and turning it into a bag of words
+        Clean the string by removing all punctuation and HTML
         http://stackoverflow.com/questions/753052/strip-html-from-strings-in-python
         :param sentence: the string potentially containing HTML and other non-alphanumerics
         :return: the string cleaned of all tags, undesirables as a list of strings (bag of words)
@@ -107,7 +107,16 @@ class LDAtopicModel(object):
         # TODO: How to handle URLs? 'httplightsidelabscomwhatresearch'
         # TODO: Contractions (i.e., can't) are okay, but possession isn't (i.e., Carolyn's)
         # TODO: Should removed characters be replaced with a space? Or no space (as is)?
-        texts = [word for word in cleaned.lower().split()]  # turning each word into an item in a list
+        return cleaned.lower()
+
+    @staticmethod
+    def to_bow(sentence):
+        """
+        Turn given string into a bag of words
+        :param sentence: the string to turn into a list
+        :return: the string  as a list of strings (bag of words)
+        """
+        texts = [word for word in sentence.split()]  # turning each word into an item in a list
         return texts
 
 class MLStripper(HTMLParser):

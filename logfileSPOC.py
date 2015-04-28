@@ -86,7 +86,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         for array_line in rows:
             comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
             if len(comment) > 0:
-                list_sentences.append(ldat.clean_string(comment))
+                list_sentences.append(ldat.to_bow(ldat.clean_string(comment)))
         print("Done processing "+filename+"\n")
 
         # preparing to output LDA topic analysis stuff
