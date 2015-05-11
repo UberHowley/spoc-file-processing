@@ -47,6 +47,10 @@ def run(filename=utils.MOD_FILE+utils.FILE_EXTENSION):
     if is_yes(user_input):
         one_way_anova(data[conditions+[utils.COL_NUM_COMMENTS]].dropna())
 
+    user_input = input("> Print ANCOVA statistics for all conditions (num prompts as covariate)? [y/n]: ")
+    if is_yes(user_input):
+        ancova(data[conditions+[utils.COL_NUM_PROMPTS, utils.COL_NUM_COMMENTS]].dropna())
+
     user_input = input("> Print Two-Way ANOVA Interaction " + str(conditions) + " statistics? [y/n]: ")
     exp_data = data[conditions + [utils.COL_NUM_COMMENTS]]
     anova_interaction(exp_data)
@@ -142,6 +146,46 @@ def one_way_anova(data_lastDV):
         fig.tight_layout()
         plt.show()
 
+def ancova(data_covar_lastDV):
+    """
+    ANCOVA for when you have a numerical covariate to control for. Read more about ANOVA/ANCOVA/etc here: http://www.statsmakemecry.com/smmctheblog/stats-soup-anova-ancova-manova-mancova
+    http://elderlab.yorku.ca/~elder/teaching/psyc3031/lectures/Lecture%207%20Analysis%20of%20Covariance%20-%20ANCOVA%20%28GLM%202%29.pdf  (slide 24)
+
+    :param data: data frame containing the independent and dependent variables (covariate is second to last, DV is last item in list)
+    :return: None
+    """
+    col_names = data_covar_lastDV.columns.values.tolist()  # get the columns' names
+    outcome = col_names.pop()  # remove the last item in the list
+    covariate = col_names.pop()  # remove the [second to] last item in the list
+
+    fig = plt.figure()
+    i = 1
+
+    for cond in col_names:
+        cond_table = data_covar_lastDV[[cond, covariate, outcome]].dropna()
+
+        cond_lm = ols(outcome + " ~ " + covariate + " + " + cond, data=cond_table).fit()
+        anova_table = anova_lm(cond_lm)
+
+        print("\n"+FORMAT_LINE)
+        print("ANCOVA: " + cond + " + " + covariate + " --> " + outcome)
+        print(FORMAT_LINE)
+        print(anova_table)
+        #print(cond_lm.model.data.orig_exog)
+        print(cond_lm.summary())
+
+        ax = fig.add_subplot(1,2, i)
+        ax = cond_table.boxplot(outcome, cond, ax=plt.gca())
+        ax.set_xlabel(cond)
+        ax.set_ylabel(outcome)
+        i += 1
+    # box plot
+    # TODO: need to remove the effect of the covariate before plotting
+    # http://statsmodels.sourceforge.net/devel/examples/generated/example_interactions.html
+    user_input = input(">> Display boxplot of conditions? [y/n]: ")
+    if is_yes(user_input):
+        fig.tight_layout()
+        plt.show()
 
 def anova_interaction(data_lastDV):
     """
