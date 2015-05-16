@@ -92,7 +92,7 @@ class UserSPOC(object):
         line += utils.COL_NUM_UPVOTES + delimiter + utils.COL_NUM_DOWNVOTES + delimiter
         for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment headers
             line += utils.COL_ASSIGNMENTS[i] + delimiter + utils.COL_ASSIGN_LATE[i] + delimiter
-        line += utils.COL_E1 + delimiter + utils.COL_E1D + delimiter + utils.COL_E2 + delimiter
+        line += utils.COL_E1 + delimiter + utils.COL_E1D + delimiter + utils.COL_FINAL + delimiter
         line += utils.COL_MIDTERM + delimiter + utils.COL_FINAL + delimiter
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
             line += header + delimiter

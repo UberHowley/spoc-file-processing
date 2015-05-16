@@ -13,8 +13,9 @@ import datetime
 CONST_SWITCH_DAY = datetime.date(2015, 4, 11)  # the day prompting conditions switched
 
 # constants
-FILE_CONDITIONS = "150404_spoc_full_data"
-FILE_POSTS = "150404_spoc_comment_data"  # TODO: not yet received
+FILE_CONDITIONS = "150512_spoc_full_data"
+FILE_POSTS = "150512_spoc_comments"
+FILE_PROMPTS = "150512_spoc_prompts"
 MOD_FILE = FILE_CONDITIONS + "_mod"
 LDA_FILE = FILE_CONDITIONS + "_lda"
 FILE_EXTENSION = ".csv"
@@ -31,23 +32,39 @@ DROP_STUDENTS = [15, 78, 105, 133, 181]
 COL_ID = "id"
 COL_VOTING = "Condition"
 COL_PROMPTS = "EncouragementType"
-COL_NUM_PROMPTS = "TODO_numPrompts"  # TODO: where's number of prompts user received?
+COL_NUM_PROMPTS = "NumTimesPrompted"
 COL_NUM_COMMENTS = "NumComments"
 COL_NUM_UPVOTES = "NumUpvotes"
 COL_NUM_DOWNVOTES = "NumDownvotes"
 COL_ASSIGNMENTS = ["Asst1", "Asst2", "Asst3", "Asst4"]
 COL_ASSIGN_LATE = ["A1Late", "A2Late", "A3Late", "A4Late"]
 COL_TOT_LATE = "TotalLate"
-COL_E1 = "Exam1"
+COL_E1 = "Exam1(Final)"
 COL_E1D = "Exam1(Deal)"
-COL_E2 = "Exam2"
 COL_MIDTERM = "MidGrade"
-COL_FINAL = "TODO_final"
+COL_FINAL = "Exam2"
 COL_EXERCISE = ["Exercise1", "Exercise2", "Exercise3", "Exercise4"]
 
-COL_SLIDE = "TODO_slide"  # TODO
-COL_COMMENT = "TODO_commentText"  # TODO
-COL_TIMESTAMP = "TODO_timestamp"  # TODO
+# comments
+COL_SLIDE = "parent_item"
+COL_COMMENT = "body_markdown"
+COL_TIMESTAMP = "created"
+COL_EDITED = "edit_timestamp"
+COL_AUTHOR = "author"
+COL_UPVOTES = "total_upvotes"
+COL_DOWNVOTES = "total_downvotes"
+COL_EDITAUTHOR = "edit_author"
+COL_EDITREASON = "edit_reason"
+
+# prompts
+COL_AUTHOR_ID = "author_id"
+COL_PARENTTYPE = "parent_type"
+COL_PARENT_ID = "parent_id"
+COL_MESSAGE = "message"
+COL_PROMPT_TYPE = "prompt_type"
+COL_ENCOURAGEMENT_TYPE ="encouragement_segment"
+COL_RECIPIENTS = "recipients"
+
 
 COL_ANY_VOTE = "hasAnyVoting"
 COL_LDA = "LDAtopic"
