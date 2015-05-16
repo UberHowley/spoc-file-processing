@@ -13,7 +13,7 @@ list_sentences = []  # a list of bag of words from all comments
 
 def run():
     process_conditions()
-    #process_comments()
+    process_comments()
 
 def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
     """
@@ -77,7 +77,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
     :return:
     """
     print("Processing " + filename)
-    with open(filename, 'r') as csvfile:
+    with open(filename, 'r', encoding="utf8") as csvfile:
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
@@ -94,7 +94,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         csvfile.seek(0)  # start at beginning of file again
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
         headers = next(rows)  # skip first header row
-        file_out = open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w')
+        file_out = open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8")
         file_out.write(utils.DELIMITER.join(cleaned_headers))
         file_out.write(utils.DELIMITER + utils.COL_LDA + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
 
@@ -126,8 +126,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
             else:
                 line += getattr(all_users[user_id], 'voting_cond')
                 line += utils.DELIMITER + getattr(all_users[user_id], 'prompting_cond')
+                file_out.write(line + '\n')
 
-            file_out.write(line + '\n')
         csvfile.close()
         file_out.close()
 
