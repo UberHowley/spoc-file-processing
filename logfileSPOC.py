@@ -78,7 +78,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
     """
     print("Processing " + filename)
     with open(filename, 'r', encoding="utf8") as csvfile:
-        rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
+        rows = csv.reader(csvfile, delimiter=utils.DELIMITER, skipinitialspace=True)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
 
@@ -96,33 +96,30 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         headers = next(rows)  # skip first header row
         file_out = open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8")
         file_out.write(utils.DELIMITER.join(cleaned_headers))
-        file_out.write(utils.DELIMITER + utils.COL_LDA + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
+        file_out.write(utils.COL_LDA + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
 
         lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
 
         for array_line in rows:
             user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
-            comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
+            comment = array_line[cleaned_headers.index(utils.COL_COMMENT)].replace(",", ";").replace("\n", " ").replace("\"", "'")  # TODO: use a CSV writer instead
 
-            """# No need to find/store this additional data
             post_id = array_line[cleaned_headers.index(utils.COL_ID)]
             tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)]
             slide = array_line[cleaned_headers.index(utils.COL_SLIDE)]
             num_upvotes = int(array_line[cleaned_headers.index(utils.COL_UPVOTES)])
             num_downvotes = array_line[cleaned_headers.index(utils.COL_DOWNVOTES)]
-            edit_time = array_line[cleaned_headers.index(utils.COL_EDITED)]
+            edit_time = array_line[cleaned_headers.index(utils.COL_EDITED)].replace("0000-00-00 00:00:00","")  # removing invalid/null timestamps
             edit_user = array_line[cleaned_headers.index(utils.COL_EDITAUTHOR)]
             edit_reason = array_line[cleaned_headers.index(utils.COL_EDITREASON)]
-            """
+            cols = [post_id,  "", tstamp, user_id, utils.COL_PARENTTYPE, utils.COL_PARENT_ID, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason, ""]
 
             topic_name = lda.predict_topic(comment)  # assign LDA topic
 
-
-            line = utils.DELIMITER.join(array_line).replace("0000-00-00 00:00:00","")  # removing invalid/null timestamps
+            line = utils.DELIMITER.join(str(c) for c in cols)
             line += utils.DELIMITER + topic_name + utils.DELIMITER
             if user_id not in all_users:
                 print("WARNING: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
-                line += "" + utils.DELIMITER + ""
             else:
                 line += getattr(all_users[user_id], 'voting_cond')
                 line += utils.DELIMITER + getattr(all_users[user_id], 'prompting_cond')
