@@ -1,5 +1,5 @@
 __author__ = 'IH'
-__project__ = 'spoc-file-processing'
+__project__ = 'processMOOC'
 
 import re
 from html.parser import HTMLParser
@@ -20,8 +20,7 @@ class LDAtopicModel(object):
     def __init__(self, nt, docs_as_bow):
         """
         Initialize class with documents to train the model on
-        :param nt: the number of topics to build in this model
-        :param docs_as_bow: a list of all text documents [as bags of words], to build the model on
+        :param docs_as_bow: a list of text documents as bags of words
         :return: None
         """
         self.docs = docs_as_bow
@@ -33,6 +32,7 @@ class LDAtopicModel(object):
         Runs all posts through an LDA topic model, to determine the basic topic of the post.
         http://chrisstrelioff.ws/sandbox/2014/11/13/getting_started_with_latent_dirichlet_allocation_in_python.html
         http://radimrehurek.com/topic_modeling_tutorial/2%20-%20Topic%20Modeling.html
+        :param all_docs: a list of bag of words (each string split into its own list)
         :return: None
         """
         print("Creating LDA topic model from " + str(len(self.docs)) + " documents.")
@@ -45,7 +45,7 @@ class LDAtopicModel(object):
         # process our stop words like all our words have been processed
         tokens_stop = []
         for word in get_stop_words('en'):
-            tokens_stop.extend(self.clean_string(word))
+            tokens_stop.extend(self.to_bow(word))
 
         tokens_once = set(word for word in set(all_tokens) if all_tokens.count(word) == 1)
         # remove words that appear only once or are stop words
@@ -82,9 +82,9 @@ class LDAtopicModel(object):
         :return: the string topic name
         """
         if self.lda is None:
-            print("ERROR in topicModelLDA.predict_topic(): Need to initialize class before predicting topics.")
+            print("ERROR in lda_topic_model.predict_topic(): Need to create_lda() before predicting topics.")
         dict_lda = getattr(self.lda, 'id2word')
-        lda_vector = self.lda[dict_lda.doc2bow(self.clean_string(document))]
+        lda_vector = self.lda[dict_lda.doc2bow(self.to_bow(document))]
         return self.topic_names[max(lda_vector, key=lambda item: item[1])[0]]
         #print(max(lda_vector, key=lambda item: item[1])[0])
         #print(lda.print_topic(max(lda_vector, key=lambda item: item[1])[0]))  # prints the most prominent LDA topic
