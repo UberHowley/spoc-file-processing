@@ -96,7 +96,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         headers = next(rows)  # skip first header row
         file_out = open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8")
         file_out.write(utils.DELIMITER.join(cleaned_headers))
-        file_out.write(utils.COL_LDA + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
+        file_out.write(utils.COL_LDA + utils.DELIMITER + utils.COL_HELP + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
 
         lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
 
@@ -115,9 +115,10 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
             cols = [post_id,  "", tstamp, user_id, utils.COL_PARENTTYPE, utils.COL_PARENT_ID, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason, ""]
 
             topic_name = lda.predict_topic(comment)  # assign LDA topic
+            is_help_request = is_help_topic(comment)  # determine if this is a help request
 
             line = utils.DELIMITER.join(str(c) for c in cols)
-            line += utils.DELIMITER + topic_name + utils.DELIMITER
+            line += utils.DELIMITER + topic_name + utils.DELIMITER + str(is_help_request) + utils.DELIMITER
             if user_id not in all_users:
                 print("WARNING: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
             else:
@@ -159,8 +160,6 @@ def process_prompts(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         file_out.write(utils.DELIMITER.join(cleaned_headers))
         file_out.write(utils.DELIMITER + utils.COL_LDA + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
 
-        lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
-
         for array_line in rows:
             recipients = array_line[cleaned_headers.index(utils.COL_RECIPIENTS)]
             print(recipients)
@@ -183,6 +182,19 @@ def process_prompts(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         file_out.close()
 
     print("Done processing " + filename +"\n")
+
+def is_help_topic(sentence):
+    """
+    Determine if the given string (message post) contains a question or help request.
+    :param sentence: a string sentence / message post
+    :return: True if the string is about help seeking
+    """
+    # TODO: this is a super naive way to determine this
+    if "help" in sentence or "question" in sentence or "?" in sentence or "dunno" in sentence or "n't know" in sentence:
+        return True
+    if "confus" in sentence or "struggl" in sentence or "lost" in sentence or "stuck" in sentence or "know how" in sentence:
+        return True
+    return False
 
 def get_timestamp(tstamp):
     """

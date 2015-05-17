@@ -68,6 +68,7 @@ COL_RECIPIENTS = "recipients"
 
 COL_ANY_VOTE = "hasAnyVoting"
 COL_LDA = "LDAtopic"
+COL_HELP = "isHelpSeeking"
 
 # conditions
 COND_VOTE = "VOTE_GROUP"
