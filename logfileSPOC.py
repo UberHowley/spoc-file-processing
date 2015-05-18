@@ -97,7 +97,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         headers = next(rows)  # skip first header row
         file_out = open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8")
         file_out.write(utils.DELIMITER.join(cleaned_headers))
-        file_out.write(utils.COL_LDA + utils.DELIMITER + utils.COL_HELP + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
+        file_out.write(utils.COL_LDA + utils.DELIMITER + utils.COL_HELP)
+        file_out.write(utils.DELIMITER + user.UserSPOC.get_headers(utils.DELIMITER) + '\n')
 
         lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
 
@@ -123,10 +124,9 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                 is_help_request = is_help_topic(comment)  # determine if this is a help request
 
                 line = utils.DELIMITER.join(str(c) for c in cols)
-                line += utils.DELIMITER + topic_name + utils.DELIMITER + str(is_help_request) + utils.DELIMITER
+                line += utils.DELIMITER + topic_name + utils.DELIMITER + str(is_help_request)
 
-                line += getattr(all_users[user_id], 'voting_cond')
-                line += utils.DELIMITER + getattr(all_users[user_id], 'prompting_cond')
+                line += utils.DELIMITER + all_users[user_id].to_string(utils.DELIMITER)
                 file_out.write(line + '\n')
 
         csvfile.close()
