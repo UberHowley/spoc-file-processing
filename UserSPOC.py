@@ -11,6 +11,7 @@ class UserSPOC(object):
     num_comments = 0
     voting_cond = ""
     any_vote_condition = ""
+    neg_vote_condition =""
     prompting_cond = ""
     num_prompts = 0
     num_upvotes = 0
@@ -54,10 +55,26 @@ class UserSPOC(object):
         self.final = f
         self.exercises = exc
 
-        # setting the any voting vs. no voting column
-        self.any_vote_cond = utils.COND_VOTE_NONE
-        if self.voting_cond is not utils.COND_VOTE_NONE:
+        # setting additional voting columns (also checking for valid condition names)
+        if self.voting_cond == utils.COND_VOTE_NONE:
+            self.any_vote_condition = "NO"+utils.COND_VOTE
+            self.neg_vote_condition = utils.COND_OTHER
+        elif self.voting_cond == utils.COND_VOTE_UP:
             self.any_vote_condition = utils.COND_VOTE
+            self.neg_vote_condition = utils.COND_OTHER
+        elif self.voting_cond == utils.COND_VOTE_BOTH:
+            self.any_vote_condition = utils.COND_VOTE
+            self.neg_vote_condition = utils.COND_VOTE_BOTH
+        else:
+            self.any_vote_condition = ""
+
+        # checking for valid condition names
+        if self.prompting_cond != utils.COND_PROMPT_POS and self.prompting_cond != utils.COND_PROMPT_NEUTRAL:
+            self.prompting_cond = ""
+
+        # Removed "_GROUP" from variable name, for display purposes
+        vc = vc.split("_")[0]
+        self.voting_cond = vc
 
     def to_string(self, delimiter):
         """
@@ -66,7 +83,7 @@ class UserSPOC(object):
         :return: a string for printing this QHInstance, coordinating with the headers
         """
         line = str(self.user_id) + delimiter + str(self.num_comments) + delimiter + self.voting_cond + delimiter
-        line += self.any_vote_condition + delimiter
+        line += self.any_vote_condition + delimiter + self.neg_vote_condition + delimiter
         line += self.prompting_cond + delimiter + str(self.num_prompts) + delimiter
         line += str(self.num_upvotes) + delimiter
         line += str(self.num_downvotes)
@@ -87,7 +104,7 @@ class UserSPOC(object):
         :return: None
         """
         line = utils.COL_ID + delimiter + utils.COL_NUM_COMMENTS + delimiter
-        line += utils.COL_VOTING + delimiter + utils.COL_ANY_VOTE + delimiter
+        line += utils.COL_VOTING + delimiter + utils.COL_ANY_VOTE + delimiter + utils.COL_NEG_VOTE + delimiter
         line += utils.COL_PROMPTS + delimiter + utils.COL_NUM_PROMPTS + delimiter
         line += utils.COL_NUM_UPVOTES + delimiter + utils.COL_NUM_DOWNVOTES + delimiter
         for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment headers

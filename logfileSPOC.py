@@ -102,26 +102,28 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
         for array_line in rows:
             user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
-            comment = array_line[cleaned_headers.index(utils.COL_COMMENT)].replace(",", ";").replace("\n", " ").replace("\"", "'")  # TODO: use a CSV writer instead
 
-            post_id = array_line[cleaned_headers.index(utils.COL_ID)]
-            tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)]
-            slide = array_line[cleaned_headers.index(utils.COL_SLIDE)]
-            num_upvotes = int(array_line[cleaned_headers.index(utils.COL_UPVOTES)])
-            num_downvotes = array_line[cleaned_headers.index(utils.COL_DOWNVOTES)]
-            edit_time = array_line[cleaned_headers.index(utils.COL_EDITED)].replace("0000-00-00 00:00:00","")  # removing invalid/null timestamps
-            edit_user = array_line[cleaned_headers.index(utils.COL_EDITAUTHOR)]
-            edit_reason = array_line[cleaned_headers.index(utils.COL_EDITREASON)]
-            cols = [post_id,  "", tstamp, user_id, utils.COL_PARENTTYPE, utils.COL_PARENT_ID, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason, ""]
-
-            topic_name = lda.predict_topic(comment)  # assign LDA topic
-            is_help_request = is_help_topic(comment)  # determine if this is a help request
-
-            line = utils.DELIMITER.join(str(c) for c in cols)
-            line += utils.DELIMITER + topic_name + utils.DELIMITER + str(is_help_request) + utils.DELIMITER
-            if user_id not in all_users:
+            if user_id not in all_users:  # this is a non-consenting student (although info is still public)
                 print("WARNING: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
             else:
+                comment = array_line[cleaned_headers.index(utils.COL_COMMENT)].replace(",", ";").replace("\n", " ").replace("\"", "'")  # TODO: use a CSV writer instead
+
+                post_id = array_line[cleaned_headers.index(utils.COL_ID)]
+                tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)]
+                slide = array_line[cleaned_headers.index(utils.COL_SLIDE)]
+                num_upvotes = int(array_line[cleaned_headers.index(utils.COL_UPVOTES)])
+                num_downvotes = array_line[cleaned_headers.index(utils.COL_DOWNVOTES)]
+                edit_time = array_line[cleaned_headers.index(utils.COL_EDITED)].replace("0000-00-00 00:00:00","")  # removing invalid/null timestamps
+                edit_user = array_line[cleaned_headers.index(utils.COL_EDITAUTHOR)]
+                edit_reason = array_line[cleaned_headers.index(utils.COL_EDITREASON)]
+                cols = [post_id,  "", tstamp, user_id, utils.COL_PARENTTYPE, utils.COL_PARENT_ID, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason, ""]
+
+                topic_name = lda.predict_topic(comment)  # assign LDA topic
+                is_help_request = is_help_topic(comment)  # determine if this is a help request
+
+                line = utils.DELIMITER.join(str(c) for c in cols)
+                line += utils.DELIMITER + topic_name + utils.DELIMITER + str(is_help_request) + utils.DELIMITER
+
                 line += getattr(all_users[user_id], 'voting_cond')
                 line += utils.DELIMITER + getattr(all_users[user_id], 'prompting_cond')
                 file_out.write(line + '\n')

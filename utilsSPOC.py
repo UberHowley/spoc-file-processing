@@ -65,17 +65,19 @@ COL_PROMPT_TYPE = "prompt_type"
 COL_ENCOURAGEMENT_TYPE ="encouragement_segment"
 COL_RECIPIENTS = "recipients"
 
-
 COL_ANY_VOTE = "hasAnyVoting"
+COL_NEG_VOTE = "negativeVoting"
 COL_LDA = "LDAtopic"
 COL_HELP = "isHelpSeeking"
 
 # conditions
-COND_VOTE = "VOTE_GROUP"
+COND_VOTE = "VOTE"
 COND_VOTE_BOTH = "UPDOWNVOTE_GROUP"
 COND_VOTE_NONE = "NOVOTE_GROUP"
 COND_VOTE_UP = "UPVOTE_GROUP"
 COND_PROMPT_POS = "POSITIVE"
 COND_PROMPT_NEUTRAL = "NEUTRAL"
+COND_NO_PROMPT = "NO_PROMPT"  # need to remove these, there should only be ~2
+COND_OTHER = "OTHER"
 
 FORMAT_LINE = "--------------------"
