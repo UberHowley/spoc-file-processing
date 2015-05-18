@@ -85,7 +85,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         # reading comments in initially and passing to LDA topic model
         for array_line in rows:
             comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
-            if len(comment) > 0:
+            user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
+            if len(comment) > 0 and user_id in all_users:  # only include comment in LDA model if student is consenting
                 list_sentences.append(ldat.to_bow(ldat.clean_string(comment)))
         print("Done processing "+filename+"\n")
 
