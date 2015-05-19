@@ -58,6 +58,9 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
             midterm = array_line[cleaned_headers.index(utils.COL_MIDTERM)]
             final = array_line[cleaned_headers.index(utils.COL_FINAL)]
 
+            if int(num_prompts) < 1:  # had to have seen at least one prompt in order to be in a prompting condition!
+                prompting_cond = ""
+
             new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, exams, midterm, final, exercises)
 
             # removing students from list
