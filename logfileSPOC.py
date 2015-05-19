@@ -112,7 +112,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
             user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
 
             if user_id not in all_users:  # this is a non-consenting student (although info is still public)
-                print("WARNING: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
+                print("Warning: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
             else:
                 comment = array_line[cleaned_headers.index(utils.COL_COMMENT)].replace(",", ";").replace("\n", " ").replace("\"", "'")  # TODO: use a CSV writer instead
 
@@ -150,35 +150,33 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
-        file_out = open(utils.FILE_PROMPTS+utils.MOD_FILE+utils.FILE_EXTENSION, 'w')
-        file_out.write(utils.DELIMITER.join(cleaned_headers))
-        file_out.write('\n')
+        with open(utils.PROMPT_MOD+utils.FILE_EXTENSION, 'w') as csvout:
+            file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL)
+            file_out.writerow(cleaned_headers)
 
-        for array_line in rows:
-            recipients = array_line[cleaned_headers.index(utils.COL_RECIPIENTS)].split(utils.DELIMITER)
-            timestamp = array_line[cleaned_headers.index(utils.COL_TSTAMP)]
+            for array_line in rows:
+                recipients = array_line[cleaned_headers.index(utils.COL_RECIPIENTS)].split(utils.DELIMITER)
+                timestamp = array_line[cleaned_headers.index(utils.COL_TSTAMP)]
 
-            """# Don't need to store these
-            prompt_id = array_line[cleaned_headers.index(utils.COL_ID)]
-            parent_type = array_line[cleaned_headers.index(utils.COL_PARENTTYPE)]
-            parent_id = array_line[cleaned_headers.index(utils.COL_PARENT_ID)]
-            author_id = array_line[cleaned_headers.index(utils.COL_AUTHOR_ID)]
-            message = array_line[cleaned_headers.index(utils.COL_MESSAGE)]
-            prompt_type = int(array_line[cleaned_headers.index(utils.COL_PROMPT_TYPE)])
-            encouragement = array_line[cleaned_headers.index(utils.COL_ENCOURAGEMENT_TYPE)]
-            author = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
-            """
-            # store timestamp if it's the first time a user's seen the prompt
-            for user in recipients:
-                user = user.strip()
-                first_prompt_dates[user] = first_prompt_dates.get(user, timestamp)
-            # TODO: calculate num comments before/after first prompt --> merge with main data table
-            line = utils.DELIMITER.join(array_line)
+                """# Don't need to store these
+                prompt_id = array_line[cleaned_headers.index(utils.COL_ID)]
+                parent_type = array_line[cleaned_headers.index(utils.COL_PARENTTYPE)]
+                parent_id = array_line[cleaned_headers.index(utils.COL_PARENT_ID)]
+                author_id = array_line[cleaned_headers.index(utils.COL_AUTHOR_ID)]
+                message = array_line[cleaned_headers.index(utils.COL_MESSAGE)]
+                prompt_type = int(array_line[cleaned_headers.index(utils.COL_PROMPT_TYPE)])
+                encouragement = array_line[cleaned_headers.index(utils.COL_ENCOURAGEMENT_TYPE)]
+                author = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
+                """
+                # store timestamp if it's the first time a user's seen the prompt
+                for user in recipients:
+                    user = user.strip()
+                    first_prompt_dates[user] = first_prompt_dates.get(user, timestamp)
+                # TODO: calculate num comments before/after first prompt --> merge with main data table
 
-            file_out.write(line + '\n')
+                file_out.writerow(array_line)  # don't actually need to re-write prompts file (not adding/doing), but is an example of csvwriter
         csvfile.close()
-        file_out.close()
-    print("Done processing " + filename +"\n")
+    print("Done processing " + filename)
 
 def is_help_topic(sentence):
     """

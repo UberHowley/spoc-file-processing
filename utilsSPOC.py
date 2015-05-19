@@ -16,6 +16,7 @@ CONST_SWITCH_DAY = datetime.date(2015, 4, 11)  # the day prompting conditions sw
 FILE_CONDITIONS = "150512_spoc_full_data"
 FILE_POSTS = "150512_spoc_comments"
 FILE_PROMPTS = "150512_spoc_prompts"
+PROMPT_MOD = FILE_PROMPTS + "_mod"
 MOD_FILE = FILE_CONDITIONS + "_mod"
 LDA_FILE = FILE_POSTS + "_lda"
 FILE_EXTENSION = ".csv"
