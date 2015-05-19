@@ -151,7 +151,7 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
         with open(utils.PROMPT_MOD+utils.FILE_EXTENSION, 'w') as csvout:
-            file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL)
+            file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
             file_out.writerow(cleaned_headers)
 
             for array_line in rows:
