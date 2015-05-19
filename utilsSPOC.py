@@ -64,6 +64,7 @@ COL_MESSAGE = "message"
 COL_PROMPT_TYPE = "prompt_type"
 COL_ENCOURAGEMENT_TYPE ="encouragement_segment"
 COL_RECIPIENTS = "recipients"
+COL_TSTAMP = "timestamp"
 
 COL_ANY_VOTE = "hasAnyVoting"
 COL_NEG_VOTE = "negativeVoting"

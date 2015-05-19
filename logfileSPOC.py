@@ -11,9 +11,12 @@ from topicModelLDA import LDAtopicModel as ldat
 all_users = {}  # uid -> UserSPOC: all users in the file and their conditions
 list_sentences = []  # a list of bag of words from all comments
 
+first_prompt_dates = {}  # uid --> timestamp: first time of prompt being received by student
+
 def run():
     process_conditions()
-    process_comments()
+    #process_comments()
+    process_prompts()
 
 def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
     """
@@ -137,11 +140,9 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
     print("Done processing " + filename +"\n")
 
-def process_prompts(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
+def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
     """
-    Parses a CSV file with the students' comments, user ids, and timestamps and assigns an automated topic.
-    IMPORTANT: Either all commas must be removed from the comment text beforehand, or some unique delimiter
-    must be used instead of commas.
+    Parses a CSV file with the students' received prompts. MUST BE SORTED BY TIMESTAMP
     :return:
     """
     print("Processing " + filename)
@@ -149,26 +150,14 @@ def process_prompts(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
-
-        # reading comments in initially and passing to LDA topic model
-        for array_line in rows:
-            comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
-            if len(comment) > 0:
-                list_sentences.append(ldat.to_bow(ldat.clean_string(comment)))
-        print("Done processing "+filename+"\n")
-
-        # preparing to output LDA topic analysis stuff
-        print("\tProcessing " + utils.LDA_FILE+utils.FILE_EXTENSION)
-        csvfile.seek(0)  # start at beginning of file again
-        rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
-        headers = next(rows)  # skip first header row
-        file_out = open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w')
+        file_out = open(utils.FILE_PROMPTS+utils.MOD_FILE+utils.FILE_EXTENSION, 'w')
         file_out.write(utils.DELIMITER.join(cleaned_headers))
-        file_out.write(utils.DELIMITER + utils.COL_LDA + utils.DELIMITER + utils.COL_VOTING + utils.DELIMITER + utils.COL_PROMPTS + '\n')
+        file_out.write('\n')
 
         for array_line in rows:
-            recipients = array_line[cleaned_headers.index(utils.COL_RECIPIENTS)]
-            print(recipients)
+            recipients = array_line[cleaned_headers.index(utils.COL_RECIPIENTS)].split(utils.DELIMITER)
+            timestamp = array_line[cleaned_headers.index(utils.COL_TSTAMP)]
+
             """# Don't need to store these
             prompt_id = array_line[cleaned_headers.index(utils.COL_ID)]
             parent_type = array_line[cleaned_headers.index(utils.COL_PARENTTYPE)]
@@ -177,16 +166,18 @@ def process_prompts(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
             message = array_line[cleaned_headers.index(utils.COL_MESSAGE)]
             prompt_type = int(array_line[cleaned_headers.index(utils.COL_PROMPT_TYPE)])
             encouragement = array_line[cleaned_headers.index(utils.COL_ENCOURAGEMENT_TYPE)]
-            timestamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)]
             author = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
             """
-
+            # store timestamp if it's the first time a user's seen the prompt
+            for user in recipients:
+                user = user.strip()
+                first_prompt_dates[user] = first_prompt_dates.get(user, timestamp)
+            # TODO: calculate num comments before/after first prompt --> merge with main data table
             line = utils.DELIMITER.join(array_line)
 
             file_out.write(line + '\n')
         csvfile.close()
         file_out.close()
-
     print("Done processing " + filename +"\n")
 
 def is_help_topic(sentence):
