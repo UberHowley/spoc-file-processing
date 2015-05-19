@@ -56,6 +56,7 @@ COL_UPVOTES = "total_upvotes"
 COL_DOWNVOTES = "total_downvotes"
 COL_EDITAUTHOR = "edit_author"
 COL_EDITREASON = "edit_reason"
+COL_ORIGINAL = "original_comment"
 
 # prompts
 COL_AUTHOR_ID = "author_id"

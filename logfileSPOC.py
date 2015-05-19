@@ -15,8 +15,8 @@ first_prompt_dates = {}  # uid --> timestamp: first time of prompt being receive
 
 def run():
     process_conditions()
-    #process_comments()
-    process_prompts()
+    process_comments()
+    #process_prompts()
 
 def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
     """
@@ -87,6 +87,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER, skipinitialspace=True)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
+        del cleaned_headers[len(cleaned_headers)-1]  # last column header is blank for some reason
+        cleaned_headers.remove(utils.COL_ORIGINAL)  # this column is blank, remove it
 
         # reading comments in initially and passing to LDA topic model
         for array_line in rows:
@@ -99,44 +101,38 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         # preparing to output LDA topic analysis stuff
         print("\tProcessing " + utils.LDA_FILE+utils.FILE_EXTENSION)
         csvfile.seek(0)  # start at beginning of file again
-        rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
+        rows = csv.reader(csvfile, delimiter=utils.DELIMITER, lineterminator='\n')
         headers = next(rows)  # skip first header row
-        file_out = open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8")
-        file_out.write(utils.DELIMITER.join(cleaned_headers))
-        file_out.write(utils.COL_LDA + utils.DELIMITER + utils.COL_HELP)
-        file_out.write(utils.DELIMITER + user.UserSPOC.get_headers(utils.DELIMITER) + '\n')
+        with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
+            file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
+            file_out.writerow(cleaned_headers + [utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
 
-        lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
+            lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
 
-        for array_line in rows:
-            user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
+            for array_line in rows:
+                user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
 
-            if user_id not in all_users:  # this is a non-consenting student (although info is still public)
-                print("Warning: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
-            else:
-                comment = array_line[cleaned_headers.index(utils.COL_COMMENT)].replace(",", ";").replace("\n", " ").replace("\"", "'")  # TODO: use a CSV writer instead
+                if user_id not in all_users:  # this is a non-consenting student (although info is still public)
+                    print("Warning: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
+                else:
+                    comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
 
-                post_id = array_line[cleaned_headers.index(utils.COL_ID)]
-                tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)]
-                slide = array_line[cleaned_headers.index(utils.COL_SLIDE)]
-                num_upvotes = int(array_line[cleaned_headers.index(utils.COL_UPVOTES)])
-                num_downvotes = array_line[cleaned_headers.index(utils.COL_DOWNVOTES)]
-                edit_time = array_line[cleaned_headers.index(utils.COL_EDITED)].replace("0000-00-00 00:00:00","")  # removing invalid/null timestamps
-                edit_user = array_line[cleaned_headers.index(utils.COL_EDITAUTHOR)]
-                edit_reason = array_line[cleaned_headers.index(utils.COL_EDITREASON)]
-                cols = [post_id,  "", tstamp, user_id, utils.COL_PARENTTYPE, utils.COL_PARENT_ID, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason, ""]
+                    post_id = array_line[cleaned_headers.index(utils.COL_ID)]
+                    tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)]
+                    slide = array_line[cleaned_headers.index(utils.COL_SLIDE)]
+                    num_upvotes = int(array_line[cleaned_headers.index(utils.COL_UPVOTES)])
+                    num_downvotes = array_line[cleaned_headers.index(utils.COL_DOWNVOTES)]
+                    edit_time = array_line[cleaned_headers.index(utils.COL_EDITED)].replace("0000-00-00 00:00:00","")  # removing invalid/null timestamps
+                    edit_user = array_line[cleaned_headers.index(utils.COL_EDITAUTHOR)]
+                    edit_reason = array_line[cleaned_headers.index(utils.COL_EDITREASON)]
+                    cols = [post_id,  "", tstamp, user_id, utils.COL_PARENTTYPE, utils.COL_PARENT_ID, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason]
 
-                topic_name = lda.predict_topic(comment)  # assign LDA topic
-                is_help_request = is_help_topic(comment)  # determine if this is a help request
+                    topic_name = lda.predict_topic(comment)  # assign LDA topic
+                    is_help_request = is_help_topic(comment)  # determine if this is a help request
 
-                line = utils.DELIMITER.join(str(c) for c in cols)
-                line += utils.DELIMITER + topic_name + utils.DELIMITER + str(is_help_request)
-
-                line += utils.DELIMITER + all_users[user_id].to_string(utils.DELIMITER)
-                file_out.write(line + '\n')
+                    file_out.writerow(cols + [topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
-        file_out.close()
 
     print("Done processing " + filename +"\n")
 
