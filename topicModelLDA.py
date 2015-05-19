@@ -27,12 +27,12 @@ class LDAtopicModel(object):
         self.number_of_topics = nt
         self.create_lda()
 
-    def create_lda(self):
+    def create_lda(self, use_input=False):
         """
         Runs all posts through an LDA topic model, to determine the basic topic of the post.
         http://chrisstrelioff.ws/sandbox/2014/11/13/getting_started_with_latent_dirichlet_allocation_in_python.html
         http://radimrehurek.com/topic_modeling_tutorial/2%20-%20Topic%20Modeling.html
-        :param all_docs: a list of bag of words (each string split into its own list)
+        :param use_input: Whether or not to ask the user to name each topic
         :return: None
         """
         print("Creating LDA topic model from " + str(len(self.docs)) + " documents.")
@@ -57,23 +57,42 @@ class LDAtopicModel(object):
         self.lda = models.ldamodel.LdaModel(corpus=mm_corpus, id2word=dict_lda, num_topics=num_topics, update_every=1, chunksize=chunk_size, passes=1)
         #topics = lda.print_topics(self.number_of_topics)
 
-        # get list of lda topic names
-        print(self.FORMAT_LINE)
-        # printing each topic
-        for topic in self.lda.print_topics(self.number_of_topics):
-            print(topic)
-        print(self.FORMAT_LINE)
+        if use_input:
+            # get list of lda topic names
+            print(self.FORMAT_LINE)
+            # printing each topic
+            for topic in self.lda.print_topics(self.number_of_topics):
+                print(topic)
+            print(self.FORMAT_LINE)
 
-        print("\n")
-        print("- Begin naming topics -")
-        # naming each topic
-        i = 1
-        for topic in self.lda.print_topics(self.number_of_topics):
-            print("\t(" + str(i) + ") "+ topic)
-            self.topic_names.append(input("> A name for topic (" + str(i) + "): "))
-            i += 1
+            print("\n")
+
+            print("- Begin naming topics -")
+            # naming each topic
+            i = 1
+            for topic in self.lda.print_topics(self.number_of_topics):
+                print("\t(" + str(i) + ") "+ topic)
+                self.topic_names.append(input("> A name for topic (" + str(i) + "): "))
+                i += 1
+        else:
+            print("- Begin guessing topics -")
+            # naming each topic based on top _n_ matching words
+            for topic in self.lda.show_topics(self.number_of_topics):
+                name = self.get_topic_name(topic, 3)
+                print("\t- " + name + " = " + topic)
+                self.topic_names.append(name)
         print("Done creating LDA topic model")
 
+    def get_topic_name(self, topic, num_words):
+        # 0.025*can + 0.023*time + 0.020*two + 0.020*work + 0.018*may + 0.017*transaction...
+        all_words = topic.split('+')
+        if num_words > len(all_words):
+            num_words = len(all_words)
+
+        name = ""
+        for i in range(0, num_words):
+            name += all_words[i][topic.index('*')+1:].strip()
+        return name
 
     def predict_topic(self, document):
         """
