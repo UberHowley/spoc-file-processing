@@ -27,6 +27,8 @@ NUM_LDA_TOPICS = 7
 DROP_STUDENTS = [15, 78, 105, 133, 181]
 # 133 and 181 are the same user with different accounts. Saw different conditions, remove them both
 # 15, 78, and 105 are not enrolled in the course
+CONSENTING_STUDENTS = [9,10,13,14,15,16,17,20,21,23,29,34,37,41,42,43,44,45,46,47,50,54,55,58,59,60,62,66,67,70,72,74,76,78,80,81,82,84,87,92,93,94,95,97,100,101,105,108,109,115,117,119,121,123,127,128,131,133,134,136,145,151,152,153,160,164,165,180,181,182]
+# IDs of all the consenting students
 
 # column headers (as written in the in-file)
 # Note: I've removed the spaces from all of these at read-in.
