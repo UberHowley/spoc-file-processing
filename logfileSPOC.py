@@ -16,7 +16,7 @@ first_prompt_dates = {}  # uid --> timestamp: first time of prompt being receive
 def run():
     process_conditions()
     process_comments()
-    #process_prompts()
+    process_prompts()
 
 def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
     """
@@ -67,7 +67,7 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
             new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, exams, midterm, final, exercises)
 
             # removing students from list
-            if user_id not in utils.DROP_STUDENTS:
+            if int(user_id) not in utils.DROP_STUDENTS and int(user_id) in utils.CONSENTING_STUDENTS:  # only store consenting students' info
                 all_users[user_id] = new_user
                 modfile_out.write(new_user.to_string(utils.DELIMITER) + '\n')
 
@@ -112,8 +112,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
             for array_line in rows:
                 user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
 
-                if user_id not in all_users:  # this is a non-consenting student (although info is still public)
-                    print("Warning: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " not in "+ utils.FILE_POSTS+utils.FILE_EXTENSION)
+                if user_id not in all_users or user_id in utils.DROP_STUDENTS or user_id not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
+                    print("Warning: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " may not be consenting. Not writing.")
                 else:
                     comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
 
@@ -151,6 +151,7 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
             file_out.writerow(cleaned_headers)
 
             for array_line in rows:
+                author_id = array_line[cleaned_headers.index(utils.COL_AUTHOR_ID)]
                 recipients = array_line[cleaned_headers.index(utils.COL_RECIPIENTS)].split(utils.DELIMITER)
                 timestamp = array_line[cleaned_headers.index(utils.COL_TSTAMP)]
 
@@ -170,7 +171,10 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
                     first_prompt_dates[user] = first_prompt_dates.get(user, timestamp)
                 # TODO: calculate num comments before/after first prompt --> merge with main data table
 
-                file_out.writerow(array_line)  # don't actually need to re-write prompts file (not adding/doing), but is an example of csvwriter
+                if author_id not in all_users or author_id in utils.DROP_STUDENTS or author_id not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
+                    print("Warning: user_id " + str(author_id) + " from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " may not be consenting. Not writing.")
+                else:
+                    file_out.writerow(array_line)  # only writing consenting students' data
         csvfile.close()
     print("Done processing " + filename)
 
