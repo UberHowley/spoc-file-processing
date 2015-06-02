@@ -78,7 +78,7 @@ class LDAtopicModel(object):
             print("- Begin guessing topics -")
             # naming each topic based on top _n_ matching words
             for topic in self.lda.show_topics(self.number_of_topics):
-                name = self.get_topic_name(topic, 3)
+                name = self.get_topic_name(topic, 2)
                 print("\t- " + name + " = " + topic)
                 self.topic_names.append(name)
         print("Done creating LDA topic model")
