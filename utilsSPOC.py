@@ -8,9 +8,8 @@ This utilsSPOC file holds the text constants for parsing the datafiles
 import datetime
 
 # date/time related stuff
-#CONST_FIRST_DAY = datetime.date(2015, 1, 1)
-#CONST_LAST_DAY = datetime.date(2015, 5, 5)
-CONST_SWITCH_DAY = datetime.date(2015, 4, 11)  # the day prompting conditions switched
+CONST_FIRST_DAY = datetime.date(2015, 2, 7)  # approximate day experiment began
+CONST_LAST_DAY = datetime.date(2015, 5, 8)  # last day of classes + 1 week
 
 # constants
 FILE_CONDITIONS = "150512_spoc_full_data"
@@ -86,3 +85,40 @@ COND_NO_PROMPT = "NO_PROMPT"  # need to remove these, there should only be ~2
 COND_OTHER = "OTHER"
 
 FORMAT_LINE = "--------------------"
+
+# mapping from lecture number to date posted, so we can toss
+# comments posted at the last minute deadline
+WEEK_THRESHOLD = 3
+# parent_id(slide) -> date(of slide)
+lecture_dates= {2: datetime.date(2015, 1, 12),
+              3: datetime.date(2015, 1, 14),
+              4: datetime.date(2015, 1, 21),
+              5: datetime.date(2015, 1, 26),
+              6: datetime.date(2015, 1, 28),
+              # 1 comment for 7: What does "-bind-to-core" do?
+              # 2 comments for 8: Doesn't the slide show *inclusive* scan, and you subtract the original vector to get exclusive scan?
+              9: datetime.date(2015, 2, 2),
+              10: datetime.date(2015, 2, 4),
+              11: datetime.date(2015, 2, 9),
+              12: datetime.date(2015, 2, 11),
+              # no 13
+              14: datetime.date(2015, 2, 16),
+              15: datetime.date(2015, 2, 18),
+              16: datetime.date(2015, 2, 23),
+              17: datetime.date(2015, 2, 25),
+              18: datetime.date(2015, 3, 4),
+              19: datetime.date(2015, 3, 16),
+              20: datetime.date(2015, 3, 18),
+              21: datetime.date(2015, 3, 23),
+              22: datetime.date(2015, 3, 25),
+              # no 23
+              24: datetime.date(2015, 3, 30),
+              25: datetime.date(2015, 4, 1),
+              26: datetime.date(2015, 4, 6),
+              27: datetime.date(2015, 4, 8),
+              28: datetime.date(2015, 4, 13),
+              30: datetime.date(2015, 4, 15),
+              29: datetime.date(2015, 4, 20),
+              31: datetime.date(2015, 4, 22),
+              32: datetime.date(2015, 4, 27),
+              33: datetime.date(2015, 4, 29)}

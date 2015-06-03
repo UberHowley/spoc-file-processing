@@ -108,17 +108,24 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
             file_out.writerow(cleaned_headers + [utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
 
             lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
+            count_consenting_crams = 0
 
             for array_line in rows:
-                user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
+                user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)].strip()
+                parent_id = array_line[cleaned_headers.index(utils.COL_PARENT_ID)].strip()
+                tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)].strip()
+                datestamp = get_timestamp(tstamp)
 
-                if user_id not in all_users or user_id in utils.DROP_STUDENTS or user_id not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
+                if user_id not in all_users or int(user_id) in utils.DROP_STUDENTS or int(user_id) not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
                     print("Warning: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " may not be consenting. Not writing.")
+                elif not is_during_experiment(datestamp):
+                    print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not within date range of experiment. Not writing.")
+                elif not is_near_posted(datestamp, parent_id):
+                    count_consenting_crams += 1
+                    print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not near posting date of lecture #" + parent_id + ": " + str(utils.lecture_dates.get(int(parent_id), "DNE")) + ". Not writing.")
                 else:
                     comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
-
                     post_id = array_line[cleaned_headers.index(utils.COL_ID)]
-                    tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)]
                     slide = array_line[cleaned_headers.index(utils.COL_SLIDE)]
                     num_upvotes = int(array_line[cleaned_headers.index(utils.COL_UPVOTES)])
                     num_downvotes = array_line[cleaned_headers.index(utils.COL_DOWNVOTES)]
@@ -134,7 +141,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
         csvfile.close()
 
-    print("Done processing " + filename +"\n")
+    print("Done processing " + filename)
+    print("\tNumber comments from consenting students occuring " + str(utils.WEEK_THRESHOLD) + "+ weeks after lecture posted: " + str(count_consenting_crams) + "\n")
 
 def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
     """
@@ -171,7 +179,7 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
                     first_prompt_dates[user] = first_prompt_dates.get(user, timestamp)
                 # TODO: calculate num comments before/after first prompt --> merge with main data table
 
-                if author_id not in all_users or author_id in utils.DROP_STUDENTS or author_id not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
+                if author_id not in all_users or int(author_id) in utils.DROP_STUDENTS or int(author_id) not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
                     print("Warning: user_id " + str(author_id) + " from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " may not be consenting. Not writing.")
                 else:
                     file_out.writerow(array_line)  # only writing consenting students' data
@@ -194,14 +202,54 @@ def is_help_topic(sentence):
 def get_timestamp(tstamp):
     """
     Clean the timestamp from a string in the logfiles
+    Format: 2015-01-12 14:28:58
     :param tstamp: string containing the timestamp
     :return: the datetime object
     """
     try:
-        tstamp = datetime.datetime.strptime(tstamp, '%Y-%m-%dT%H:%M:%S.%f')  # TODO adjust for matching datetime format
+        tstamp = datetime.datetime.strptime(tstamp, '%Y-%m-%d %H:%M:%S')
     except ValueError as err:
         print(tstamp, err)
     return tstamp
+
+def is_during_experiment(comment_date, first_day=utils.CONST_FIRST_DAY, last_day=utils.CONST_LAST_DAY):
+    """
+    Determine if given date is within the range of dates the experiment took place
+    :param comment_date: date to check if it's in range
+    :return: True if given date is in our restricted time range
+    """
+    if comment_date is not None:
+        if last_day >= comment_date.date() >= first_day:
+            return True
+        else:  # Not in given course date range
+            return False
+    else:
+        print("ERROR:: logfileSPOC.is_during_experiment(): Cannot process date: " + comment_date)
+        return False
+
+def is_near_posted(comment_date, lecture_id, num_weeks=utils.WEEK_THRESHOLD):
+    """
+    Determine if given date is within num_weeks of lecture_id
+    :param instance_date: date to check if it's in range
+    :param lecture_id: id number of lecture the comment date belongs to
+    :param num_weeks: number of weeks comment must be posted to lecture within
+    :return: True if given date is in our restricted time range
+    """
+    if int(lecture_id) not in utils.lecture_dates:  # there's three comments on a lecture that does not exist
+        return False
+    first_day = utils.lecture_dates[int(lecture_id)]
+    last_day = first_day + datetime.timedelta(weeks=num_weeks)
+
+    if comment_date is not None:
+        if last_day >= comment_date.date() >= first_day:
+            return True
+        elif first_day > comment_date.date():
+            print("WARNING: Comment was posted BEFORE lecture was posted: " + str(first_day) + " > " + str(comment_date))
+        else:  # Not in given course date range
+            return False
+    else:
+        print("ERROR:: logfileSPOC.is_near_posted(): Cannot process date: " + comment_date)
+        return False
 
 if __name__ == '__main__':
     print("Running logfileSPOC")
