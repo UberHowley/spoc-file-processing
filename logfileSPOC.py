@@ -62,7 +62,7 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
             final = array_line[cleaned_headers.index(utils.COL_FINAL)]
 
             if int(num_prompts) < 1:  # had to have seen at least one prompt in order to be in a prompting condition!
-                prompting_cond = ""
+                prompting_cond = utils.COND_NO_PROMPT
 
             new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, exams, midterm, final, exercises)
 
