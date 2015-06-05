@@ -69,7 +69,7 @@ class UserSPOC(object):
             self.any_vote_condition = ""
 
         # checking for valid condition names
-        if self.prompting_cond != utils.COND_PROMPT_POS and self.prompting_cond != utils.COND_PROMPT_NEUTRAL:
+        if self.prompting_cond != utils.COND_PROMPT_POS and self.prompting_cond != utils.COND_PROMPT_NEUTRAL and self.prompting_cond != utils.COND_NO_PROMPT:
             self.prompting_cond = ""
 
         # Removed "_GROUP" from variable name, for display purposes
