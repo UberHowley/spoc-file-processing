@@ -132,7 +132,9 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     edit_time = array_line[cleaned_headers.index(utils.COL_EDITED)].replace("0000-00-00 00:00:00","")  # removing invalid/null timestamps
                     edit_user = array_line[cleaned_headers.index(utils.COL_EDITAUTHOR)]
                     edit_reason = array_line[cleaned_headers.index(utils.COL_EDITREASON)]
-                    cols = [post_id,  "", tstamp, user_id, utils.COL_PARENTTYPE, utils.COL_PARENT_ID, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason]
+                    ptype = array_line[cleaned_headers.index(utils.COL_PARENTTYPE)]
+                    pid = array_line[cleaned_headers.index(utils.COL_PARENT_ID)]
+                    cols = [post_id,  "", tstamp, user_id, ptype, pid, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason]
 
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
@@ -154,6 +156,7 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
+        cleaned_headers += ["recip0", "recip1"]  # splitting recipients into separate columns
         with open(utils.PROMPT_MOD+utils.FILE_EXTENSION, 'w') as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
             file_out.writerow(cleaned_headers)
@@ -179,10 +182,19 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
                     first_prompt_dates[user] = first_prompt_dates.get(user, timestamp)
                 # TODO: calculate num comments before/after first prompt --> merge with main data table
 
-                if author_id not in all_users or int(author_id) in utils.DROP_STUDENTS or int(author_id) not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
-                    print("Warning: user_id " + str(author_id) + " from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " may not be consenting. Not writing.")
-                else:
-                    file_out.writerow(array_line)  # only writing consenting students' data
+                # removing non-consenting prompt recipients
+                consenting = []
+                for recip in recipients:
+                    recip = recip.replace(' ', '')
+                    if recip not in all_users or int(recip) in utils.DROP_STUDENTS or int(recip) not in utils.CONSENTING_STUDENTS:  # the recipient is a non-consenting student (although info is still public)
+                        print("Warning: recipient of prompt (" + str(recip) + ") from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " not consenting.")
+                        consenting.append("non_consent")
+                    else:
+                        consenting.append(recip)
+                consenting.sort()
+                array_line[cleaned_headers.index(utils.COL_RECIPIENTS)] = utils.DELIMITER.join(consenting)
+                array_line += consenting
+                file_out.writerow(array_line)  # only writing consenting students' data
         csvfile.close()
     print("Done processing " + filename)
 
