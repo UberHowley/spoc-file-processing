@@ -105,7 +105,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         headers = next(rows)  # skip first header row
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-            file_out.writerow(cleaned_headers + [utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
+            file_out.writerow(cleaned_headers + ["num_days_after_post", utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
 
             lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
             count_consenting_crams = 0
@@ -139,7 +139,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
 
-                    file_out.writerow(cols + [topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
+                    file_out.writerow(cols + [days_after(datestamp, parent_id), topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
 
@@ -262,6 +262,23 @@ def is_near_posted(comment_date, lecture_id, num_weeks=utils.WEEK_THRESHOLD):
     else:
         print("ERROR:: logfileSPOC.is_near_posted(): Cannot process date: " + comment_date)
         return False
+
+def days_after(comment_date, lecture_id):
+    """
+    Determine number of days apart comment is from lecture it was posted to
+    :param instance_date: date to check if it's in range
+    :param lecture_id: id number of lecture the comment date belongs to
+    :return: True if given date is in our restricted time range
+    """
+    if int(lecture_id) not in utils.lecture_dates:  # there's three comments on a lecture that does not exist
+        return ""
+    lecture_date = utils.lecture_dates[int(lecture_id)]
+
+    if comment_date is not None:
+        return (comment_date.date() - lecture_date).days
+    else:
+        print("ERROR:: logfileSPOC.days_after(): Cannot process date: " + comment_date)
+        return ""
 
 if __name__ == '__main__':
     print("Running logfileSPOC")
