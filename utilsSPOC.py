@@ -45,7 +45,7 @@ COL_E1 = "Exam1(Final)"
 COL_E1D = "Exam1(Deal)"
 COL_MIDTERM = "MidGrade"
 COL_FINAL = "Exam2"
-COL_EXERCISE = ["Exercise1", "Exercise2", "Exercise3", "Exercise4"]
+COL_EXERCISE = ["Exercise1", "Exercise2", "Exercise3", "Exercise4", "Exercise5", "Exercise6"]
 
 # comments
 COL_SLIDE = "parent_item"

@@ -22,6 +22,7 @@ class UserSPOC(object):
     midterm = -1
     final = -1
     exercises = []
+    num_help_requests = 0
 
     def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, e, mt, f, exc):
         """
@@ -94,6 +95,7 @@ class UserSPOC(object):
         line += delimiter + self.midterm + delimiter + self.final
         for exc in self.exercises:  # iterating through exercise headers
             line += delimiter + exc
+        line += delimiter + str(self.num_help_requests)
         return line
 
     @staticmethod
@@ -110,8 +112,9 @@ class UserSPOC(object):
         for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment headers
             line += utils.COL_ASSIGNMENTS[i] + delimiter + utils.COL_ASSIGN_LATE[i] + delimiter
         line += utils.COL_E1 + delimiter + utils.COL_E1D + delimiter + utils.COL_FINAL + delimiter
-        line += utils.COL_MIDTERM + delimiter + utils.COL_FINAL + delimiter
+        line += utils.COL_MIDTERM + delimiter + utils.COL_FINAL
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
-            line += header + delimiter
+            line += delimiter + header
+        line += delimiter + "num_help_requests"
         return line
 
