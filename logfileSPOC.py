@@ -10,6 +10,7 @@ from topicModelLDA import LDAtopicModel as ldat
 # variables
 all_users = {}  # uid -> UserSPOC: all users in the file and their conditions
 list_sentences = []  # a list of bag of words from all comments
+user_helps = {}  # uid -> num help requests
 
 first_prompt_dates = {}  # uid --> timestamp: first time of prompt being received by student
 
@@ -138,6 +139,10 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
+
+                    # add this help request to our counts of student help requests
+                    if is_help_request:
+                        user_helps[user_id] = user_helps.get(user_id, 0) + 1
 
                     file_out.writerow(cols + [days_after(datestamp, parent_id), topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
 
