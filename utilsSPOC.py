@@ -41,10 +41,11 @@ COL_NUM_DOWNVOTES = "NumDownvotes"
 COL_ASSIGNMENTS = ["Asst1", "Asst2", "Asst3", "Asst4"]
 COL_ASSIGN_LATE = ["A1Late", "A2Late", "A3Late", "A4Late"]
 COL_TOT_LATE = "TotalLate"
-COL_E1 = "Exam1(Final)"
+COL_E1 = "Exam1"
 COL_E1D = "Exam1(Deal)"
-COL_MIDTERM = "MidGrade"
-COL_FINAL = "Exam2"
+COL_E1F = "Exam1(Final)"
+COL_MIDGRADE = "MidGrade"
+COL_E2 = "Exam2"
 COL_EXERCISE = ["Exercise1", "Exercise2", "Exercise3", "Exercise4", "Exercise5", "Exercise6"]
 COL_HELP_REQS = "num_help_requests"
 

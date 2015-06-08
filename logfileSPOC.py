@@ -52,6 +52,7 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
             num_downvotes = array_line[cleaned_headers.index(utils.COL_NUM_DOWNVOTES)]
             assignments = []
             assignment_lates = []
+            tot_late = array_line[cleaned_headers.index(utils.COL_TOT_LATE)]
             exercises = []
             exams = []
             for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment headers
@@ -65,14 +66,13 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
                 if len(score) < 1:
                     score = ""
                 exercises.append(score)
-            exams.extend([array_line[cleaned_headers.index(utils.COL_E1)], array_line[cleaned_headers.index(utils.COL_E1D)], array_line[cleaned_headers.index(utils.COL_FINAL)]])
-            midterm = array_line[cleaned_headers.index(utils.COL_MIDTERM)]
-            final = array_line[cleaned_headers.index(utils.COL_FINAL)]
+            exams.extend([array_line[cleaned_headers.index(utils.COL_E1)], array_line[cleaned_headers.index(utils.COL_E1D)], array_line[cleaned_headers.index(utils.COL_E1F)], array_line[cleaned_headers.index(utils.COL_E2)]])
+            midterm = array_line[cleaned_headers.index(utils.COL_MIDGRADE)]
 
             if int(num_prompts) < 1:  # had to have seen at least one prompt in order to be in a prompting condition!
                 prompting_cond = utils.COND_NO_PROMPT
 
-            new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, exams, midterm, final, exercises)
+            new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, tot_late, exams, midterm, exercises)
 
             # removing students from list
             if int(user_id) not in utils.DROP_STUDENTS and int(user_id) in utils.CONSENTING_STUDENTS:  # only store consenting students' info

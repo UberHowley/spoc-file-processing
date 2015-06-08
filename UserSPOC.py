@@ -18,13 +18,13 @@ class UserSPOC(object):
     num_downvotes = 0
     assignments = []
     assignment_lates = []
+    tot_late = 0
     exams = []
     midterm = -1
-    final = -1
     exercises = []
     num_help_requests = 0
 
-    def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, e, mt, f, exc):
+    def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, tl, e, mg, exc):
         """
 
         :param uid: user id
@@ -51,9 +51,9 @@ class UserSPOC(object):
         self.num_downvotes = down
         self.assignments = assi
         self.assignment_lates = asl
+        self.tot_late = tl
         self.exams = e
-        self.midterm = mt
-        self.final = f
+        self.midgrade = mg
         self.exercises = exc
 
         # setting additional voting columns (also checking for valid condition names)
@@ -90,9 +90,10 @@ class UserSPOC(object):
         line += str(self.num_downvotes)
         for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment scores
             line += delimiter + self.assignments[i] + delimiter + self.assignment_lates[i]
+        line += delimiter + self.tot_late
         for exam in self.exams:  # iterating through exam scores
             line += delimiter + exam
-        line += delimiter + self.midterm + delimiter + self.final
+        line += delimiter + self.midgrade
         for exc in self.exercises:  # iterating through exercise headers
             line += delimiter + exc
         line += delimiter + str(self.num_help_requests)
@@ -111,8 +112,9 @@ class UserSPOC(object):
         line += utils.COL_NUM_UPVOTES + delimiter + utils.COL_NUM_DOWNVOTES + delimiter
         for i in range(0, len(utils.COL_ASSIGNMENTS)):  # iterating through assignment headers
             line += utils.COL_ASSIGNMENTS[i] + delimiter + utils.COL_ASSIGN_LATE[i] + delimiter
-        line += utils.COL_E1 + delimiter + utils.COL_E1D + delimiter + utils.COL_FINAL + delimiter
-        line += utils.COL_MIDTERM + delimiter + utils.COL_FINAL
+        line += utils.COL_TOT_LATE + delimiter
+        line += utils.COL_E1 + delimiter + utils.COL_E1D + delimiter + utils.COL_E1F + delimiter + utils.COL_E2 + delimiter
+        line += utils.COL_MIDGRADE
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
             line += delimiter + header
         line += delimiter + utils.COL_HELP_REQS
