@@ -32,7 +32,7 @@ def load_data(filename=utils.MOD_FILE+utils.FILE_EXTENSION):
     new_prompts = int_prefix + utils.COL_PROMPTS
     data[new_voting] = pd.Categorical.from_array(data.Condition).codes  # recodes categorical vars as numerical
     data[new_prompts] = pd.Categorical.from_array(data.EncouragementType).codes  # recodes categorical vars as numerical
-    columns = [new_voting, new_prompts, utils.COL_NUM_PROMPTS, utils.COL_MIDTERM, utils.COL_NUM_COMMENTS]
+    columns = [new_voting, new_prompts, utils.COL_NUM_PROMPTS, utils.COL_MIDGRADE, utils.COL_NUM_COMMENTS]
     cluster_data = data[columns].dropna().astype(np.float64)
 
     # load the dataset transformed to float with numeric columns,
@@ -96,7 +96,7 @@ def plot_clusters(orig, pred, outcome, yaxis, legend=True):
     :return: axes plot
     """
     data = orig
-    ylabels = {0: utils.COL_VOTING, 1: utils.COL_PROMPTS, 2: utils.COL_NUM_PROMPTS, 3: utils.COL_MIDTERM}
+    ylabels = {0: utils.COL_VOTING, 1: utils.COL_PROMPTS, 2: utils.COL_NUM_PROMPTS, 3: utils.COL_MIDGRADE}
     #orig = [new_voting, new_prompts, utils.COL_NUM_PROMPTS, utils.COL_MIDTERM, utils.COL_NUM_COMMENTS]
     # plot data into three clusters based on value of c
     p0 = plt.plot(data[pred == 0, outcome], data[pred == 0, yaxis], 'ro', label='group0')
@@ -122,7 +122,7 @@ def subplot_clusters(orig, pred, outcome, legend=True):
     :return: axes plot
     """
     data = orig
-    ylabels = {0: utils.COL_VOTING, 1: utils.COL_PROMPTS, 2: utils.COL_NUM_PROMPTS, 3: utils.COL_MIDTERM}
+    ylabels = {0: utils.COL_VOTING, 1: utils.COL_PROMPTS, 2: utils.COL_NUM_PROMPTS, 3: utils.COL_MIDGRADE}
     #orig = [new_voting, new_prompts, utils.COL_NUM_PROMPTS, utils.COL_MIDTERM, utils.COL_NUM_COMMENTS]
     fig = plt.figure()
 
