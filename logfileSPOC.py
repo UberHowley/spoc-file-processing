@@ -19,6 +19,16 @@ def run():
     process_comments()
     process_prompts()
 
+    # writing the users file to CSV
+    filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION
+    modfile_out = open(utils.MOD_FILE + utils.FILE_EXTENSION, 'w')
+    modfile_out.write(user.UserSPOC.get_headers(utils.DELIMITER) + '\n')
+
+    for usr in all_users:
+        modfile_out.write(all_users[usr].to_string(utils.DELIMITER) + utils.DELIMITER + str(user_helps.get(usr, 0)) + '\n')
+    modfile_out.close()
+
+
 def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
     """
     Calculate the average per-user accuracy (user’s percentage correct / total problems done)
@@ -27,8 +37,6 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
     """
     # --------------------
     print("Processing " + filename)
-    modfile_out = open(utils.MOD_FILE + utils.FILE_EXTENSION, 'w')
-    modfile_out.write(user.UserSPOC.get_headers(utils.DELIMITER) + "\n")
 
     with open(filename, 'r') as csvfile:
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER)
@@ -70,10 +78,8 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
             # removing students from list
             if int(user_id) not in utils.DROP_STUDENTS and int(user_id) in utils.CONSENTING_STUDENTS:  # only store consenting students' info
                 all_users[user_id] = new_user
-                modfile_out.write(new_user.to_string(utils.DELIMITER) + '\n')
 
     csvfile.close()
-    modfile_out.close()
     print("Done processing "+filename+"\n")
 
 def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
