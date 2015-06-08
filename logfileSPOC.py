@@ -147,7 +147,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
                     # add this help request to our counts of student help requests
                     if is_help_request and all_users.get(user_id, None) is not None:
-                        setattr(all_users[user_id], "num_help_requests", getattr(all_users[user_id],"num_help_requests") + 1)
+                        setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
 
                     file_out.writerow(cols + [days_after(datestamp, parent_id), topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
 

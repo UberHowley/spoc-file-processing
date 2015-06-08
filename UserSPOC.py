@@ -115,6 +115,6 @@ class UserSPOC(object):
         line += utils.COL_MIDTERM + delimiter + utils.COL_FINAL
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
             line += delimiter + header
-        line += delimiter + "num_help_requests"
+        line += delimiter + utils.COL_HELP_REQS
         return line
 
