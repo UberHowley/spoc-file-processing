@@ -19,7 +19,6 @@ def run():
     process_prompts()
 
     # writing the users file to CSV
-    filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION
     modfile_out = open(utils.MOD_FILE + utils.FILE_EXTENSION, 'w')
     modfile_out.write(user.UserSPOC.get_headers(utils.DELIMITER) + '\n')
 
@@ -75,7 +74,7 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
             new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, tot_late, exams, midterm, exercises)
 
             # removing students from list
-            if int(user_id) not in utils.DROP_STUDENTS and int(user_id) in utils.CONSENTING_STUDENTS:  # only store consenting students' info
+            if is_consenting_student(user_id):  # only store consenting students' info
                 all_users[user_id] = new_user
 
     csvfile.close()
@@ -100,7 +99,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         for array_line in rows:
             comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
             user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
-            if len(comment) > 0 and user_id in all_users:  # only include comment in LDA model if student is consenting
+            if len(comment) > 0 and is_consenting_student(user_id):  # only include comment in LDA model if student is consenting
                 list_sentences.append(ldat.to_bow(ldat.clean_string(comment)))
         print("Done processing "+filename+"\n")
 
@@ -122,7 +121,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                 tstamp = array_line[cleaned_headers.index(utils.COL_TIMESTAMP)].strip()
                 datestamp = get_timestamp(tstamp)
 
-                if user_id not in all_users or int(user_id) in utils.DROP_STUDENTS or int(user_id) not in utils.CONSENTING_STUDENTS:  # this is a non-consenting student (although info is still public)
+                if user_id not in all_users or not is_consenting_student(user_id):  # this is a non-consenting student (although info is still public)
                     print("Warning: user_id " + str(user_id) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " may not be consenting. Not writing.")
                 elif not is_during_experiment(datestamp):
                     print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not within date range of experiment. Not writing.")
@@ -196,7 +195,7 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
                 consenting = []
                 for recip in recipients:
                     recip = recip.replace(' ', '')
-                    if recip not in all_users or int(recip) in utils.DROP_STUDENTS or int(recip) not in utils.CONSENTING_STUDENTS:  # the recipient is a non-consenting student (although info is still public)
+                    if is_consenting_student(recip):
                         print("Warning: recipient of prompt (" + str(recip) + ") from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " not consenting.")
                         consenting.append("non_consent")
                     else:
@@ -289,6 +288,14 @@ def days_after(comment_date, lecture_id):
     else:
         print("ERROR:: logfileSPOC.days_after(): Cannot process date: " + comment_date)
         return ""
+
+def is_consenting_student(user_id):
+    """
+    Check to see if given user ID is a consenting one
+    :param user_id: a user id to check
+    :return: True if user is consenting
+    """
+    return int(user_id) not in utils.DROP_STUDENTS and int(user_id) in utils.CONSENTING_STUDENTS
 
 if __name__ == '__main__':
     print("Running logfileSPOC")
