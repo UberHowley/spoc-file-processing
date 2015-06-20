@@ -26,7 +26,10 @@ NUM_LDA_TOPICS = 15
 DROP_STUDENTS = [15, 78, 105, 133, 181]
 # 133 and 181 are the same user with different accounts. Saw different conditions, remove them both
 # 15, 78, and 105 are not enrolled in the course
-CONSENTING_STUDENTS = [9,10,13,14,15,16,17,20,21,23,29,34,37,41,42,43,44,45,46,47,50,54,55,58,59,60,62,66,67,70,72,74,76,78,80,81,82,84,87,92,93,94,95,97,100,101,105,108,109,115,117,119,121,123,127,128,131,133,134,136,145,151,152,153,160,164,165,180,181,182]
+CONSENTING_STUDENTS = [9, 10, 13, 14, 15, 16, 17, 20, 21, 23, 29, 34, 37, 41, 42, 43, 44, 45, 46, 47, 50, 54, 55, 58,
+                       59, 60, 62, 66, 67, 70, 72, 74, 76, 78, 80, 81, 82, 84, 87, 92, 93, 94, 95, 97, 100, 101, 105,
+                       108, 109, 115, 117, 119, 121, 123, 127, 128, 131, 133, 134, 136, 145, 151, 152, 153, 160, 164,
+                       165, 180, 181, 182]
 # IDs of all the consenting students
 
 # column headers (as written in the in-file)
@@ -67,7 +70,7 @@ COL_PARENTTYPE = "parent_type"
 COL_PARENT_ID = "parent_id"
 COL_MESSAGE = "message"
 COL_PROMPT_TYPE = "prompt_type"
-COL_ENCOURAGEMENT_TYPE ="encouragement_segment"
+COL_ENCOURAGEMENT_TYPE = "encouragement_segment"
 COL_RECIPIENTS = "recipients"
 COL_TSTAMP = "timestamp"
 
@@ -92,35 +95,35 @@ FORMAT_LINE = "--------------------"
 # comments posted at the last minute deadline
 WEEK_THRESHOLD = 3
 # parent_id(slide) -> date(of slide)
-lecture_dates= {2: datetime.date(2015, 1, 12),
-              3: datetime.date(2015, 1, 14),
-              4: datetime.date(2015, 1, 21),
-              5: datetime.date(2015, 1, 26),
-              6: datetime.date(2015, 1, 28),
-              # 1 comment for 7: What does "-bind-to-core" do?
-              # 2 comments for 8: Doesn't the slide show *inclusive* scan, and you subtract the original vector to get exclusive scan?
-              9: datetime.date(2015, 2, 2),
-              10: datetime.date(2015, 2, 4),
-              11: datetime.date(2015, 2, 9),
-              12: datetime.date(2015, 2, 11),
-              # no 13
-              14: datetime.date(2015, 2, 16),
-              15: datetime.date(2015, 2, 18),
-              16: datetime.date(2015, 2, 23),
-              17: datetime.date(2015, 2, 25),
-              18: datetime.date(2015, 3, 4),
-              19: datetime.date(2015, 3, 16),
-              20: datetime.date(2015, 3, 18),
-              21: datetime.date(2015, 3, 23),
-              22: datetime.date(2015, 3, 25),
-              # no 23
-              24: datetime.date(2015, 3, 30),
-              25: datetime.date(2015, 4, 1),
-              26: datetime.date(2015, 4, 6),
-              27: datetime.date(2015, 4, 8),
-              28: datetime.date(2015, 4, 13),
-              30: datetime.date(2015, 4, 15),
-              29: datetime.date(2015, 4, 20),
-              31: datetime.date(2015, 4, 22),
-              32: datetime.date(2015, 4, 27),
-              33: datetime.date(2015, 4, 29)}
+lecture_dates = [(2, datetime.date(2015, 1, 12)),
+                 (3, datetime.date(2015, 1, 14)),
+                 (4, datetime.date(2015, 1, 21)),
+                 (5, datetime.date(2015, 1, 26)),
+                 (6, datetime.date(2015, 1, 28)),
+                 # 1 comment for 7: What does "-bind-to-core" do?
+                 # 2 comments for 8: Doesn't the slide show *inclusive* scan, and you subtract the original vector to get exclusive scan?
+                 (9, datetime.date(2015, 2, 2)),
+                 (10, datetime.date(2015, 2, 4)),
+                 (11, datetime.date(2015, 2, 9)),
+                 (12, datetime.date(2015, 2, 11)),
+                 # no 13
+                 (14, datetime.date(2015, 2, 16)),
+                 (15, datetime.date(2015, 2, 18)),
+                 (16, datetime.date(2015, 2, 23)),
+                 (17, datetime.date(2015, 2, 25)),
+                 (18, datetime.date(2015, 3, 4)),
+                 (19, datetime.date(2015, 3, 16)),
+                 (20, datetime.date(2015, 3, 18)),
+                 (21, datetime.date(2015, 3, 23)),
+                 (22, datetime.date(2015, 3, 25)),
+                 # no 23
+                 (24, datetime.date(2015, 3, 30)),
+                 (25, datetime.date(2015, 4, 1)),
+                 (26, datetime.date(2015, 4, 6)),
+                 (27, datetime.date(2015, 4, 8)),
+                 (28, datetime.date(2015, 4, 13)),
+                 (30, datetime.date(2015, 4, 15)),
+                 (29, datetime.date(2015, 4, 20)),
+                 (31, datetime.date(2015, 4, 22)),
+                 (32, datetime.date(2015, 4, 27)),
+                 (33, datetime.date(2015, 4, 29))]

@@ -127,7 +127,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not within date range of experiment. Not writing.")
                 elif not is_near_posted(datestamp, parent_id):
                     count_consenting_crams += 1
-                    print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not near posting date of lecture #" + parent_id + ": " + str(utils.lecture_dates.get(int(parent_id), "DNE")) + ". Not writing.")
+                    print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not near posting date of lecture #" + parent_id + ". Not writing.")
                 else:
                     comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
                     post_id = array_line[cleaned_headers.index(utils.COL_ID)]
@@ -148,7 +148,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     if is_help_request and all_users.get(user_id, None) is not None:
                         setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
 
-                    file_out.writerow(cols + [days_after(datestamp, parent_id), str(utils.lecture_dates[int(parent_id)]), topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
+                    dict_ld = dict(utils.lecture_dates)
+                    file_out.writerow(cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
 
@@ -256,9 +257,10 @@ def is_near_posted(comment_date, lecture_id, num_weeks=utils.WEEK_THRESHOLD):
     :param num_weeks: number of weeks comment must be posted to lecture within
     :return: True if given date is in our restricted time range
     """
-    if int(lecture_id) not in utils.lecture_dates:  # there's three comments on a lecture that does not exist
+    dict_ld = dict(utils.lecture_dates)
+    if int(lecture_id) not in dict_ld:  # there's three comments on a lecture that does not exist
         return False
-    first_day = utils.lecture_dates[int(lecture_id)]
+    first_day = dict_ld[int(lecture_id)]
     last_day = first_day + datetime.timedelta(weeks=num_weeks)
 
     if comment_date is not None:
@@ -279,9 +281,10 @@ def days_after(comment_date, lecture_id):
     :param lecture_id: id number of lecture the comment date belongs to
     :return: True if given date is in our restricted time range
     """
-    if int(lecture_id) not in utils.lecture_dates:  # there's three comments on a lecture that does not exist
+    dict_ld = dict(utils.lecture_dates)
+    if int(lecture_id) not in dict_ld:  # there's three comments on a lecture that does not exist
         return ""
-    lecture_date = utils.lecture_dates[int(lecture_id)]
+    lecture_date = dict_ld[int(lecture_id)]
 
     if comment_date is not None:
         return (comment_date.date() - lecture_date).days
