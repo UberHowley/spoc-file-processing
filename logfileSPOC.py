@@ -6,6 +6,7 @@ import datetime
 import utilsSPOC as utils
 import UserSPOC as user
 from topicModelLDA import LDAtopicModel as ldat
+import urllib.request as ur
 
 # variables
 all_users = {}  # uid -> UserSPOC: all users in the file and their conditions
@@ -108,9 +109,20 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         csvfile.seek(0)  # start at beginning of file again
         rows = csv.reader(csvfile, delimiter=utils.DELIMITER, lineterminator='\n')
         headers = next(rows)  # skip first header row
+
+        # load up LIWC libraries for quick sentiment analysis
+        files = ['negative.txt', 'positive.txt']
+        path = 'http://www.unc.edu/~ncaren/haphazard/'
+        for file_name in files:
+            ur.urlretrieve(path+file_name, file_name)
+        pos_sent = open("positive.txt").read()
+        positive_words = pos_sent.split('\n')
+        neg_sent = open("negative.txt").read()
+        negative_words = neg_sent.split('\n')
+
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-            file_out.writerow(cleaned_headers + ["comment_length", "num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
+            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", "comment_length", "liwc_positive_words", utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
 
             lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
             count_consenting_crams = 0
@@ -144,12 +156,20 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
 
+                    # count the number of positive words in the comment
+                    num_positive = 0
+                    processed = comment.lower()
+                    words = processed.split(' ')
+                    for word in words:
+                        if word in positive_words:
+                            num_positive += 1
+
                     # add this help request to our counts of student help requests
                     if is_help_request and all_users.get(user_id, None) is not None:
                         setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
 
                     dict_ld = dict(utils.lecture_dates)
-                    file_out.writerow(cols + [len(comment), days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
+                    file_out.writerow(cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), len(comment), num_positive, topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
 
