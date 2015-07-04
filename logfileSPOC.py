@@ -156,7 +156,11 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
 
-                    # count the number of positive words in the comment
+                    # add this help request to our counts of student help requests
+                    if is_help_request and all_users.get(user_id, None) is not None:
+                        setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
+
+                    # LIWC - count the number of positive/negative words in the comment
                     num_positive = 0
                     num_negative = 0
                     processed = comment.lower()
@@ -166,10 +170,13 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                             num_positive += 1
                         elif word in negative_words:
                             num_negative += 1
+                    # LIWC - add these counts to our student user
+                    if all_users.get(user_id, None) is not None:
+                        setattr(all_users[user_id], "liwc_positive_words", getattr(all_users[user_id],"liwc_positive_words") + num_positive)
+                        setattr(all_users[user_id], "liwc_negative_words", getattr(all_users[user_id],"liwc_negative_words") + num_negative)
+                        setattr(all_users[user_id], "comment_length", getattr(all_users[user_id],"comment_length") + len(comment))
 
-                    # add this help request to our counts of student help requests
-                    if is_help_request and all_users.get(user_id, None) is not None:
-                        setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
+
 
                     dict_ld = dict(utils.lecture_dates)
                     file_out.writerow(cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), len(comment), num_positive, num_negative, topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))

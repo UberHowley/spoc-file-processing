@@ -23,6 +23,10 @@ class UserSPOC(object):
     midterm = -1
     exercises = []
     num_help_requests = 0
+    # keeping track of LIWC comment word counts
+    liwc_positive_words = 0
+    liwc_negative_words = 0
+    comment_length = 0
 
     def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, tl, e, mg, exc):
         """
@@ -97,6 +101,9 @@ class UserSPOC(object):
         for exc in self.exercises:  # iterating through exercise headers
             line += delimiter + exc
         line += delimiter + str(self.num_help_requests)
+        line += delimiter + str(self.liwc_positive_words)
+        line += delimiter + str(self.liwc_negative_words)
+        line += delimiter + str(self.comment_length)
         return line
 
     @staticmethod
@@ -118,5 +125,8 @@ class UserSPOC(object):
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
             line += delimiter + header
         line += delimiter + utils.COL_HELP_REQS
+        line += delimiter + "liwc_positive_words"
+        line += delimiter + "liwc_negative_words"
+        line += delimiter + "comment_length"
         return line
 
