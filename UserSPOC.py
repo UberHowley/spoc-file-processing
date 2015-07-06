@@ -125,8 +125,8 @@ class UserSPOC(object):
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
             line += delimiter + header
         line += delimiter + utils.COL_HELP_REQS
-        line += delimiter + "liwc_positive_words"
-        line += delimiter + "liwc_negative_words"
-        line += delimiter + "comment_length"
+        line += delimiter + utils.LIWC_POSITIVE
+        line += delimiter + utils.LIWC_NEGATIVE
+        line += delimiter + utils.COMMENT_WORDS
         return line
 

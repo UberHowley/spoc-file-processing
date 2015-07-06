@@ -51,6 +51,9 @@ COL_MIDGRADE = "MidGrade"
 COL_E2 = "Exam2"
 COL_EXERCISE = ["Exercise1", "Exercise2", "Exercise3", "Exercise4", "Exercise5", "Exercise6"]
 COL_HELP_REQS = "num_help_requests"
+LIWC_POSITIVE = "liwc_positive_words"
+LIWC_NEGATIVE = "liwc_negative_words"
+COMMENT_WORDS = "comment_length"
 
 # comments
 COL_SLIDE = "parent_item"

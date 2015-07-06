@@ -122,7 +122,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", "comment_length", "liwc_positive_words", "liwc_negative_words", utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
+            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
 
             lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
             count_consenting_crams = 0
@@ -172,9 +172,9 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                             num_negative += 1
                     # LIWC - add these counts to our student user
                     if all_users.get(user_id, None) is not None:
-                        setattr(all_users[user_id], "liwc_positive_words", getattr(all_users[user_id],"liwc_positive_words") + num_positive)
-                        setattr(all_users[user_id], "liwc_negative_words", getattr(all_users[user_id],"liwc_negative_words") + num_negative)
-                        setattr(all_users[user_id], "comment_length", getattr(all_users[user_id],"comment_length") + len(comment))
+                        setattr(all_users[user_id], utils.LIWC_POSITIVE, getattr(all_users[user_id],utils.LIWC_POSITIVE) + num_positive)
+                        setattr(all_users[user_id], utils.LIWC_NEGATIVE, getattr(all_users[user_id],utils.LIWC_NEGATIVE) + num_negative)
+                        setattr(all_users[user_id], utils.COMMENT_WORDS, getattr(all_users[user_id],utils.COMMENT_WORDS) + len(comment))
 
 
 
