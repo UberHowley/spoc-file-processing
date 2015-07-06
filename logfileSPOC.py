@@ -100,6 +100,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         for array_line in rows:
             comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
             user_id = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
+
             if len(comment) > 0 and is_consenting_student(user_id):  # only include comment in LDA model if student is consenting
                 list_sentences.append(ldat.to_bow(ldat.clean_string(comment)))
         print("Done processing "+filename+"\n")
@@ -155,6 +156,9 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
+
+                    # add this to our count of legitimate/punctual comments
+                    setattr(all_users[user_id], utils.COL_NUM_LEGIT_COMMENTS, getattr(all_users[user_id],utils.COL_NUM_LEGIT_COMMENTS) + 1)
 
                     # add this help request to our counts of student help requests
                     if is_help_request and all_users.get(user_id, None) is not None:

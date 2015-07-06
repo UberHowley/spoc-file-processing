@@ -22,6 +22,9 @@ class UserSPOC(object):
     exams = []
     midterm = -1
     exercises = []
+
+    # user counting
+    num_punctual_comments = 0  # some students post comments waaaaay after the lecture is posted, keep track of legitimate comment count!
     num_help_requests = 0
     # keeping track of LIWC comment word counts
     liwc_positive_words = 0
@@ -87,7 +90,8 @@ class UserSPOC(object):
         :param delimiter: character to split each column
         :return: a string for printing this QHInstance, coordinating with the headers
         """
-        line = str(self.user_id) + delimiter + str(self.num_comments) + delimiter + self.voting_cond + delimiter
+        line = str(self.user_id) + delimiter + str(self.num_comments) + delimiter + str(self.num_punctual_comments) + delimiter
+        line += self.voting_cond + delimiter
         line += self.any_vote_condition + delimiter + self.neg_vote_condition + delimiter
         line += self.prompting_cond + delimiter + str(self.num_prompts) + delimiter
         line += str(self.num_upvotes) + delimiter
@@ -113,7 +117,7 @@ class UserSPOC(object):
         :param delimiter: character to split each column header
         :return: None
         """
-        line = utils.COL_ID + delimiter + utils.COL_NUM_COMMENTS + delimiter
+        line = utils.COL_ID + delimiter + utils.COL_NUM_COMMENTS + delimiter + utils.COL_NUM_LEGIT_COMMENTS + delimiter
         line += utils.COL_VOTING + delimiter + utils.COL_ANY_VOTE + delimiter + utils.COL_NEG_VOTE + delimiter
         line += utils.COL_PROMPTS + delimiter + utils.COL_NUM_PROMPTS + delimiter
         line += utils.COL_NUM_UPVOTES + delimiter + utils.COL_NUM_DOWNVOTES + delimiter

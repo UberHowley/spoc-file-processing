@@ -39,6 +39,7 @@ COL_VOTING = "Condition"
 COL_PROMPTS = "EncouragementType"
 COL_NUM_PROMPTS = "NumTimesPrompted"
 COL_NUM_COMMENTS = "NumComments"
+COL_NUM_LEGIT_COMMENTS = "num_punctual_comments"  # some students post comments waaaaay after the lecture is posted, keep track of legitimate comment count!
 COL_NUM_UPVOTES = "NumUpvotes"
 COL_NUM_DOWNVOTES = "NumDownvotes"
 COL_ASSIGNMENTS = ["Asst1", "Asst2", "Asst3", "Asst4"]
