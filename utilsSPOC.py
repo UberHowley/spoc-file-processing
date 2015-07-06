@@ -57,6 +57,7 @@ LIWC_POSITIVE = "liwc_positive_words"
 LIWC_NEGATIVE = "liwc_negative_words"
 COMMENT_WORDS = "comment_length"
 LATE_COMMENTS = "num_late_comments"
+BEFORE_EXP_COMMENTS = "num_comments_before_experiment"
 
 # comments
 COL_SLIDE = "parent_item"
