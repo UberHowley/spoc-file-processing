@@ -21,6 +21,7 @@ LDA_FILE = FILE_POSTS + "_lda"
 FILE_EXTENSION = ".csv"
 DELIMITER = ","
 NUM_LDA_TOPICS = 15
+WEEK_THRESHOLD = 3  # threshhold num weeks after a lecture for comment to be considered 'punctual'
 
 # student issues
 DROP_STUDENTS = [15, 78, 105, 133, 181]
@@ -55,6 +56,7 @@ COL_HELP_REQS = "num_help_requests"
 LIWC_POSITIVE = "liwc_positive_words"
 LIWC_NEGATIVE = "liwc_negative_words"
 COMMENT_WORDS = "comment_length"
+LATE_COMMENTS = "num_late_comments"
 
 # comments
 COL_SLIDE = "parent_item"
@@ -97,7 +99,6 @@ FORMAT_LINE = "--------------------"
 
 # mapping from lecture number to date posted, so we can toss
 # comments posted at the last minute deadline
-WEEK_THRESHOLD = 3
 # parent_id(slide) -> date(of slide)
 lecture_dates = [(2, datetime.date(2015, 1, 12)),
                  (3, datetime.date(2015, 1, 14)),
