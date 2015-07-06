@@ -140,6 +140,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not within date range of experiment. Not writing.")
                 elif not is_near_posted(datestamp, parent_id):
                     count_consenting_crams += 1
+                    setattr(all_users[user_id], utils.LATE_COMMENTS, getattr(all_users[user_id],utils.LATE_COMMENTS) + 1)  # keep count of comments posted too late for each user
                     print("Warning: comment timestamp " + str(datestamp) + " from " + utils.LDA_FILE+utils.FILE_EXTENSION + " is not near posting date of lecture #" + parent_id + ". Not writing.")
                 else:
                     comment = array_line[cleaned_headers.index(utils.COL_COMMENT)]
