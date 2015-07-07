@@ -89,13 +89,19 @@ class UserSPOC(object):
 
     def to_string(self, delimiter):
         """
-        Create a string for printing this QHInstance, coordinating with the headers
+        Create a string for printing all UserSPOC variables
         :param delimiter: character to split each column
-        :return: a string for printing this QHInstance, coordinating with the headers
+        :return: a string for printing all variables from this UserSPOC object
+        """
+        return self.to_const_string(delimiter) + self.to_count_string(delimiter)
+
+    def to_const_string(self, delimiter):
+        """
+        Create a string for printing constant/non-count variables
+        :param delimiter: character to split each column
+        :return: a string for printing non-count variables from this UserSPOC object
         """
         line = str(self.user_id) + delimiter + str(self.num_comments) + delimiter
-        line += str(self.num_punctual_comments) + delimiter + str(self.num_late_comments) + delimiter
-        line += str(self.num_comments_before_experiment) + delimiter
         line += self.voting_cond + delimiter
         line += self.any_vote_condition + delimiter + self.neg_vote_condition + delimiter
         line += self.prompting_cond + delimiter + str(self.num_prompts) + delimiter
@@ -109,6 +115,16 @@ class UserSPOC(object):
         line += delimiter + self.midgrade
         for exc in self.exercises:  # iterating through exercise headers
             line += delimiter + exc
+        return line
+
+    def to_count_string(self, delimiter):
+        """
+        Create a string for printing only variables that are counts (from comments, usually)
+        :param delimiter: character to split each column
+        :return: a string for printing this UserSPOC, coordinating with the headers
+        """
+        line = str(self.num_punctual_comments) + delimiter + str(self.num_late_comments) + delimiter
+        line += str(self.num_comments_before_experiment) + delimiter
         line += delimiter + str(self.num_help_requests)
         line += delimiter + str(self.liwc_positive_words)
         line += delimiter + str(self.liwc_negative_words)
@@ -123,9 +139,8 @@ class UserSPOC(object):
         :param delimiter: character to split each column header
         :return: None
         """
+        # constant variables
         line = utils.COL_ID + delimiter + utils.COL_NUM_COMMENTS + delimiter
-        line += utils.COL_NUM_LEGIT_COMMENTS + delimiter + utils.LATE_COMMENTS + delimiter
-        line += utils.BEFORE_EXP_COMMENTS + delimiter
         line += utils.COL_VOTING + delimiter + utils.COL_ANY_VOTE + delimiter + utils.COL_NEG_VOTE + delimiter
         line += utils.COL_PROMPTS + delimiter + utils.COL_NUM_PROMPTS + delimiter
         line += utils.COL_NUM_UPVOTES + delimiter + utils.COL_NUM_DOWNVOTES + delimiter
@@ -136,6 +151,10 @@ class UserSPOC(object):
         line += utils.COL_MIDGRADE
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
             line += delimiter + header
+
+        # count variables
+        line += utils.COL_NUM_LEGIT_COMMENTS + delimiter + utils.LATE_COMMENTS + delimiter
+        line += utils.BEFORE_EXP_COMMENTS + delimiter
         line += delimiter + utils.COL_HELP_REQS
         line += delimiter + utils.LIWC_POSITIVE
         line += delimiter + utils.LIWC_NEGATIVE
