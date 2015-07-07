@@ -55,7 +55,8 @@ COL_EXERCISE = ["Exercise1", "Exercise2", "Exercise3", "Exercise4", "Exercise5",
 COL_HELP_REQS = "num_help_requests"
 LIWC_POSITIVE = "liwc_positive_words"
 LIWC_NEGATIVE = "liwc_negative_words"
-COMMENT_WORDS = "comment_length"
+COMMENT_CHARS = "comment_length"
+COMMENT_WORDS = "num_comment_words"
 LATE_COMMENTS = "num_late_comments"
 BEFORE_EXP_COMMENTS = "num_comments_before_experiment"
 

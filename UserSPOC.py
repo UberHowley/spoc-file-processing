@@ -30,6 +30,7 @@ class UserSPOC(object):
     liwc_positive_words = 0
     liwc_negative_words = 0
     comment_length = 0
+    num_comment_words = 0
     num_late_comments = 0
     num_comments_before_experiment = 0
 
@@ -111,6 +112,7 @@ class UserSPOC(object):
         line += delimiter + str(self.num_help_requests)
         line += delimiter + str(self.liwc_positive_words)
         line += delimiter + str(self.liwc_negative_words)
+        line += delimiter + str(self.num_comment_words)
         line += delimiter + str(self.comment_length)
         return line
 
@@ -138,5 +140,6 @@ class UserSPOC(object):
         line += delimiter + utils.LIWC_POSITIVE
         line += delimiter + utils.LIWC_NEGATIVE
         line += delimiter + utils.COMMENT_WORDS
+        line += delimiter + utils.COMMENT_CHARS
         return line
 
