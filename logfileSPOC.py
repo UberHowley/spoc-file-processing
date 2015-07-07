@@ -169,6 +169,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                         setattr(all_users[user_id], utils.COMMENT_WORDS, getattr(all_users[user_id],utils.COMMENT_WORDS) + num_comment_words)
 
                     dict_ld = dict(utils.lecture_dates)
+                    # TODO: all_users[user_id] now includes counts that increase as comments are processed...need to print it later
                     file_out.writerow(cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), len(comment), num_positive, num_negative, topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
