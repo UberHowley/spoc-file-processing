@@ -6,7 +6,7 @@ import datetime
 import utilsSPOC as utils
 import UserSPOC as user
 from topicModelLDA import LDAtopicModel as ldat
-import urllib.request as ur
+import liwc as liwc
 
 # variables
 all_users = {}  # uid -> UserSPOC: all users in the file and their conditions
@@ -112,14 +112,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         headers = next(rows)  # skip first header row
 
         # load up LIWC libraries for quick sentiment analysis
-        files = ['negative.txt', 'positive.txt']
-        path = 'http://www.unc.edu/~ncaren/haphazard/'
-        for file_name in files:
-            ur.urlretrieve(path+file_name, file_name)
-        pos_sent = open("positive.txt").read()
-        positive_words = pos_sent.split('\n')
-        neg_sent = open("negative.txt").read()
-        negative_words = neg_sent.split('\n')
+        sentiment = liwc.liwc()
 
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
@@ -167,22 +160,12 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                         setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
 
                     # LIWC - count the number of positive/negative words in the comment
-                    num_positive = 0
-                    num_negative = 0
-                    processed = comment.lower()
-                    words = processed.split(' ')
-                    for word in words:
-                        if word in positive_words:
-                            num_positive += 1
-                        elif word in negative_words:
-                            num_negative += 1
+                    num_positive, num_negative, num_words = sentiment.count_sentiments(comment)
                     # LIWC - add these counts to our student user
                     if all_users.get(user_id, None) is not None:
                         setattr(all_users[user_id], utils.LIWC_POSITIVE, getattr(all_users[user_id],utils.LIWC_POSITIVE) + num_positive)
                         setattr(all_users[user_id], utils.LIWC_NEGATIVE, getattr(all_users[user_id],utils.LIWC_NEGATIVE) + num_negative)
                         setattr(all_users[user_id], utils.COMMENT_WORDS, getattr(all_users[user_id],utils.COMMENT_WORDS) + len(comment))
-
-
 
                     dict_ld = dict(utils.lecture_dates)
                     file_out.writerow(cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), len(comment), num_positive, num_negative, topic_name, str(is_help_request)] + all_users[user_id].to_string(utils.DELIMITER).split(utils.DELIMITER))
