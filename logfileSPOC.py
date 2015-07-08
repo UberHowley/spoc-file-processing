@@ -163,14 +163,15 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     num_positive, num_negative, num_comment_words = sentiment.count_sentiments(comment)
                     # LIWC - add these counts to our student user
                     if all_users.get(user_id, None) is not None:
-                        setattr(all_users[user_id], utils.LIWC_POSITIVE, getattr(all_users[user_id],utils.LIWC_POSITIVE) + num_positive)
-                        setattr(all_users[user_id], utils.LIWC_NEGATIVE, getattr(all_users[user_id],utils.LIWC_NEGATIVE) + num_negative)
-                        setattr(all_users[user_id], utils.COMMENT_CHARS, getattr(all_users[user_id],utils.COMMENT_CHARS) + len(comment))
-                        setattr(all_users[user_id], utils.COMMENT_WORDS, getattr(all_users[user_id],utils.COMMENT_WORDS) + num_comment_words)
+                        setattr(all_users[user_id], utils.LIWC_POSITIVE, getattr(all_users[user_id], utils.LIWC_POSITIVE) + num_positive)
+                        setattr(all_users[user_id], utils.LIWC_NEGATIVE, getattr(all_users[user_id], utils.LIWC_NEGATIVE) + num_negative)
+                        setattr(all_users[user_id], utils.COMMENT_CHARS, getattr(all_users[user_id], utils.COMMENT_CHARS) + len(comment))
+                        setattr(all_users[user_id], utils.COMMENT_WORDS, getattr(all_users[user_id], utils.COMMENT_WORDS) + num_comment_words)
 
                     dict_ld = dict(utils.lecture_dates)
                     # TODO: print to_counts_string() later
-                    file_out.writerow(cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request)] + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
+                    line = cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request)]
+                    file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
 
