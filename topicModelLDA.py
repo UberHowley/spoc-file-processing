@@ -116,6 +116,9 @@ class LDAtopicModel(object):
         :param sentence: the string potentially containing HTML and other non-alphanumerics
         :return: the string cleaned of all tags, undesirables as a list of strings (bag of words)
         """
+        # TODO: Should removed characters be replaced with a space? Or no space (as is)?
+        removed_char = ''
+
         s = MLStripper()
         s.feed(sentence)
         no_html = s.get_data()
@@ -124,12 +127,11 @@ class LDAtopicModel(object):
             no_html = sentence
 
         # Remove "'s" possession contractions
-        cleaned = no_html.replace("'s", '')
+        cleaned = no_html.replace("'s", removed_char)
 
-        cleaned = re.sub(r'[^a-zA-Z\' ]+', '', cleaned)  # Leaving in letters and apostrophes
-
+        cleaned = re.sub(r'[^a-zA-Z\' ]+', removed_char, cleaned)  # Leaving in letters and apostrophes
         # TODO: How to handle URLs? 'httplightsidelabscomwhatresearch'
-        # TODO: Should removed characters be replaced with a space? Or no space (as is)?
+
         return cleaned.lower()
 
     @staticmethod
