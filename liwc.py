@@ -21,8 +21,6 @@ class liwc(object):
         :param files: filenames of sentiment files
         :return: None
         """
-        for file_name in files:
-            ur.urlretrieve(path+file_name, file_name)
         pos_sent = open("positive.txt").read()
         self.positive_words = pos_sent.split('\n')
         neg_sent = open("negative.txt").read()
