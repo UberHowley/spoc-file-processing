@@ -122,9 +122,13 @@ class LDAtopicModel(object):
         # This code apparently removes all text in a string without any HTML
         if len(no_html) < 10:
             no_html = sentence
-        cleaned = re.sub(r'[^a-zA-Z\' ]+', '', no_html)  # Leaving in letters and apostrophes
+
+        # Remove "'s" possession contractions
+        cleaned = no_html.replace("'s", '')
+
+        cleaned = re.sub(r'[^a-zA-Z\' ]+', '', cleaned)  # Leaving in letters and apostrophes
+
         # TODO: How to handle URLs? 'httplightsidelabscomwhatresearch'
-        # TODO: Contractions (i.e., can't) are okay, but possession isn't (i.e., Carolyn's)
         # TODO: Should removed characters be replaced with a space? Or no space (as is)?
         return cleaned.lower()
 
