@@ -93,7 +93,7 @@ class UserSPOC(object):
         :param delimiter: character to split each column
         :return: a string for printing all variables from this UserSPOC object
         """
-        return self.to_const_string(delimiter) + self.to_count_string(delimiter)
+        return self.to_const_string(delimiter) + delimiter + self.to_count_string(delimiter)
 
     def to_const_string(self, delimiter):
         """
@@ -123,8 +123,8 @@ class UserSPOC(object):
         :param delimiter: character to split each column
         :return: a string for printing this UserSPOC, coordinating with the headers
         """
-        line = str(self.num_punctual_comments) + delimiter + str(self.num_late_comments) + delimiter
-        line += str(self.num_comments_before_experiment) + delimiter
+        line = str(self.num_punctual_comments) + delimiter + str(self.num_late_comments)
+        line += delimiter + str(self.num_comments_before_experiment)
         line += delimiter + str(self.num_help_requests)
         line += delimiter + str(self.liwc_positive_words)
         line += delimiter + str(self.liwc_negative_words)
@@ -153,8 +153,9 @@ class UserSPOC(object):
             line += delimiter + header
 
         # count variables
-        line += utils.COL_NUM_LEGIT_COMMENTS + delimiter + utils.LATE_COMMENTS + delimiter
-        line += utils.BEFORE_EXP_COMMENTS + delimiter
+        line += delimiter + utils.COL_NUM_LEGIT_COMMENTS
+        line += delimiter + utils.LATE_COMMENTS
+        line += delimiter + utils.BEFORE_EXP_COMMENTS
         line += delimiter + utils.COL_HELP_REQS
         line += delimiter + utils.LIWC_POSITIVE
         line += delimiter + utils.LIWC_NEGATIVE
