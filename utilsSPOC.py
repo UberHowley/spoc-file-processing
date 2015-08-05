@@ -40,7 +40,6 @@ COL_VOTING = "Condition"
 COL_PROMPTS = "EncouragementType"
 COL_NUM_PROMPTS = "NumTimesPrompted"
 COL_NUM_COMMENTS = "NumComments"
-COL_NUM_LEGIT_COMMENTS = "num_punctual_comments"  # some students post comments waaaaay after the lecture is posted, keep track of legitimate comment count!
 COL_NUM_UPVOTES = "NumUpvotes"
 COL_NUM_DOWNVOTES = "NumDownvotes"
 COL_ASSIGNMENTS = ["Asst1", "Asst2", "Asst3", "Asst4"]
@@ -52,6 +51,9 @@ COL_E1F = "Exam1(Final)"
 COL_MIDGRADE = "MidGrade"
 COL_E2 = "Exam2"
 COL_EXERCISE = ["Exercise1", "Exercise2", "Exercise3", "Exercise4", "Exercise5", "Exercise6"]
+
+# outside of database created columns
+COL_NUM_LEGIT_COMMENTS = "num_punctual_comments"  # some students post comments waaaaay after the lecture is posted, keep track of legitimate comment count!
 COL_HELP_REQS = "num_help_requests"
 LIWC_POSITIVE = "liwc_positive_words"
 LIWC_NEGATIVE = "liwc_negative_words"

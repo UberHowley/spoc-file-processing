@@ -116,7 +116,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
+            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP, "mean_word_length", "median_word_length"] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
 
             lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
             count_consenting_crams = 0
@@ -152,6 +152,12 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
 
+                    comment_mean_word_length = sum(len(word) for word in comment.split())/len(comment.split())  # mean word length of comment
+                    word_lengths = []
+                    for word in comment.split():
+                        word_lengths.append(len(word))
+                    comment_median_word_length = median(word_lengths)  # median word length of comment
+
                     # add this to our count of legitimate/punctual comments
                     setattr(all_users[user_id], utils.COL_NUM_LEGIT_COMMENTS, getattr(all_users[user_id],utils.COL_NUM_LEGIT_COMMENTS) + 1)
 
@@ -170,7 +176,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
                     dict_ld = dict(utils.lecture_dates)
                     # TODO: print to_counts_string() later
-                    line = cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request)]
+                    line = cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length]
                     file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
@@ -229,6 +235,15 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
                 file_out.writerow(array_line)  # only writing consenting students' data
         csvfile.close()
     print("Done processing " + filename)
+
+def median(x):
+  """
+  Takes in a list of numbers and output the middle number
+  """
+  if len(x) < 1:
+      return 0
+  x.sort()  # after taking the list, sort it
+  return (x[int(len(x)/2)])
 
 def is_help_topic(sentence):
     """
