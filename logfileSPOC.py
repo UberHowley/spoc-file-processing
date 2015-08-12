@@ -121,7 +121,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP, "mean_word_length", "median_word_length"] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
+            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP, "mean_word_length", "median_word_length", utils.COL_COMMENTS_AFTER_PROMPT] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
 
             lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
             count_consenting_crams = 0
@@ -172,13 +172,16 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
                     # count num comments before and after first prompt
                     first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
+                    is_after = ""
                     if first_prompt is None or len(str(first_prompt)) < 1:
                         # no first prompt, nothing to change
                         setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, "")
-                    elif first_prompt < datestamp:  # this comment is after the first prompt
+                    elif first_prompt <= datestamp:  # this comment is after the first prompt
                         setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_AFTER_PROMPT) + 1)
+                        is_after = "y"
                     elif first_prompt > datestamp:  # this comment is before the first prompt
                         setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_BEFORE_PROMPT) + 1)
+                        is_after = "n"
 
                     # LIWC - count the number of positive/negative words in the comment
                     num_positive, num_negative, num_comment_words = sentiment.count_sentiments(comment)
@@ -191,7 +194,8 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
                     dict_ld = dict(utils.lecture_dates)
                     # TODO: print to_counts_string() later
-                    line = cols + [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length]
+                    line = cols
+                    line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length, is_after]
                     file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
