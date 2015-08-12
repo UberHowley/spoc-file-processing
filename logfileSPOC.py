@@ -74,7 +74,6 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
 
             # first prompt date
             first_prompt = utils.first_prompts.get(int(user_id.strip()), "")
-            print("\t"+str(user_id)+" "+str(first_prompt))
             if len(first_prompt) > 1 :
                 first_prompt = datetime.datetime.strptime(first_prompt, '%m/%d/%Y')
 
@@ -170,6 +169,16 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     # add this help request to our counts of student help requests
                     if is_help_request and all_users.get(user_id, None) is not None:
                         setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
+
+                    # count num comments before and after first prompt
+                    first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
+                    if first_prompt is None or len(str(first_prompt)) < 1:
+                        # no first prompt, nothing to change
+                        setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, "")
+                    elif first_prompt < datestamp:  # this comment is after the first prompt
+                        setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_AFTER_PROMPT) + 1)
+                    elif first_prompt > datestamp:  # this comment is before the first prompt
+                        setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_BEFORE_PROMPT) + 1)
 
                     # LIWC - count the number of positive/negative words in the comment
                     num_positive, num_negative, num_comment_words = sentiment.count_sentiments(comment)

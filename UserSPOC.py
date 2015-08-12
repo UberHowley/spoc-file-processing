@@ -138,6 +138,8 @@ class UserSPOC(object):
         line += delimiter + str(self.liwc_negative_words)
         line += delimiter + str(self.num_comment_words)
         line += delimiter + str(self.comment_length)
+        line += delimiter + str(self.comments_before_prompt)
+        line += delimiter + str(self.comments_after_prompt)
         return line
 
     @staticmethod
@@ -170,5 +172,7 @@ class UserSPOC(object):
         line += delimiter + utils.LIWC_NEGATIVE
         line += delimiter + utils.COMMENT_WORDS
         line += delimiter + utils.COMMENT_CHARS
+        line += delimiter + utils.COL_COMMENTS_BEFORE_PROMPT
+        line += delimiter + utils.COL_COMMENTS_AFTER_PROMPT
         return line
 
