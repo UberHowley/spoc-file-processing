@@ -72,7 +72,13 @@ def process_conditions(filename=utils.FILE_CONDITIONS+utils.FILE_EXTENSION):
             if int(num_prompts) < 1:  # had to have seen at least one prompt in order to be in a prompting condition!
                 prompting_cond = utils.COND_NO_PROMPT
 
-            new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, tot_late, exams, midterm, exercises)
+            # first prompt date
+            first_prompt = utils.first_prompts.get(int(user_id.strip()), "")
+            print("\t"+str(user_id)+" "+str(first_prompt))
+            if len(first_prompt) > 1 :
+                first_prompt = datetime.datetime.strptime(first_prompt, '%m/%d/%Y')
+
+            new_user = user.UserSPOC(user_id, num_comments, voting_cond, prompting_cond, int(num_prompts), num_upvotes, num_downvotes, assignments, assignment_lates, tot_late, exams, midterm, exercises, first_prompt)
 
             # removing students from list
             if is_consenting_student(user_id):  # only store consenting students' info

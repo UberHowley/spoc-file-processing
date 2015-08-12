@@ -23,6 +23,8 @@ class UserSPOC(object):
     midterm = -1
     exercises = []
 
+    first_prompt_date = ""
+
     # user counting
     num_punctual_comments = 0  # some students post comments waaaaay after the lecture is posted, keep track of legitimate comment count!
     num_help_requests = 0
@@ -34,7 +36,11 @@ class UserSPOC(object):
     num_late_comments = 0
     num_comments_before_experiment = 0
 
-    def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, tl, e, mg, exc):
+    # num comments before/after first prompt
+    comments_before_prompt = 0
+    comments_after_prompt = 0
+
+    def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, tl, e, mg, exc, fpd):
         """
 
         :param uid: user id
@@ -65,6 +71,7 @@ class UserSPOC(object):
         self.exams = e
         self.midgrade = mg
         self.exercises = exc
+        self.first_prompt_date = fpd
 
         # setting additional voting columns (also checking for valid condition names)
         if self.voting_cond == utils.COND_VOTE_NONE:
@@ -115,6 +122,7 @@ class UserSPOC(object):
         line += delimiter + self.midgrade
         for exc in self.exercises:  # iterating through exercise headers
             line += delimiter + exc
+        line += delimiter + str(self.first_prompt_date)
         return line
 
     def to_count_string(self, delimiter):
@@ -151,6 +159,7 @@ class UserSPOC(object):
         line += utils.COL_MIDGRADE
         for header in utils.COL_EXERCISE:  # iterating through exercise headers
             line += delimiter + header
+        line += delimiter + utils.COL_FIRST_PROMPT_DATE
 
         # count variables
         line += delimiter + utils.COL_NUM_LEGIT_COMMENTS
