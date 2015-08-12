@@ -233,21 +233,16 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
                 encouragement = array_line[cleaned_headers.index(utils.COL_ENCOURAGEMENT_TYPE)]
                 author = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
                 """
-                # store timestamp if it's the first time a user's seen the prompt
-                for user in recipients:
-                    user = user.strip()
-                    first_prompt_dates[user] = first_prompt_dates.get(user, timestamp)
-                # TODO: calculate num comments before/after first prompt --> merge with main data table
 
                 # removing non-consenting prompt recipients
                 consenting = []
                 for recip in recipients:
                     recip = recip.replace(' ', '')
                     if is_consenting_student(recip):
+                        consenting.append(recip)
+                    else:
                         print("Warning: recipient of prompt (" + str(recip) + ") from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " not consenting.")
                         consenting.append("non_consent")
-                    else:
-                        consenting.append(recip)
                 consenting.sort()
                 array_line[cleaned_headers.index(utils.COL_RECIPIENTS)] = utils.DELIMITER.join(consenting)
                 array_line += consenting
