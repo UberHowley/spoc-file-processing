@@ -94,19 +94,40 @@ class LDAtopicModel(object):
             name += all_words[i][topic.index('*')+1:].strip()
         return name
 
+    def topic_distribution_scores(self, document):
+        """
+        Acquire the topic distribution probabilities for the given document
+        :param document: the string to predict the topic for
+        :return: the string topic name
+        """
+        if self.lda is None:
+            print("ERROR in lda_topic_model.topic_distribution_scores(): Need to create_lda() before predicting topics.")
+        dict_lda = getattr(self.lda, 'id2word')
+        lda_vector = self.lda[dict_lda.doc2bow(self.to_bow(document))]
+        return lda_vector
+
+    def topic_distribution_scores_list(self, document):
+        """
+        Turns a tuple list of topic distribution scores into a list by index
+        :return: the string topic name
+        """
+        # Turn list of tuples into a standard list
+        # [(3, 0.056740372898456126), (4, 0.27516198725956603), (5, 0.24956765283142127), (7, 0.076124760183927817), (8, 0.059447458221449888), (12, 0.19117117467036432), (13, 0.063716414727980106)]
+        list_lda = [0] * self.number_of_topics
+        for t in self.topic_distribution_scores(document):
+            list_lda[t[0]] = t[1]
+
+        return list_lda
+
+
     def predict_topic(self, document):
         """
         Predict the most likely topic for the given document
         :param document: the string to predict the topic for
         :return: the string topic name
         """
-        if self.lda is None:
-            print("ERROR in lda_topic_model.predict_topic(): Need to create_lda() before predicting topics.")
-        dict_lda = getattr(self.lda, 'id2word')
-        lda_vector = self.lda[dict_lda.doc2bow(self.to_bow(document))]
+        lda_vector = self.topic_distribution_scores(document)
         return self.topic_names[max(lda_vector, key=lambda item: item[1])[0]]
-        #print(max(lda_vector, key=lambda item: item[1])[0])
-        #print(lda.print_topic(max(lda_vector, key=lambda item: item[1])[0]))  # prints the most prominent LDA topic
 
     @staticmethod
     def clean_string(sentence):

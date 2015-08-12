@@ -121,7 +121,12 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
 
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
-            file_out.writerow(cleaned_headers + ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP, "mean_word_length", "median_word_length", utils.COL_COMMENTS_AFTER_PROMPT] + user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER))
+            new_headers = cleaned_headers
+            new_headers += ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP, "mean_word_length", "median_word_length", utils.COL_COMMENTS_AFTER_PROMPT]
+            for i in range(0, utils.NUM_LDA_TOPICS):  # topic headers for topic distribution scores
+                new_headers += ["topic_" + str(i)]
+            new_headers += user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER)
+            file_out.writerow(new_headers)
 
             lda = ldat(utils.NUM_LDA_TOPICS, list_sentences)  # create topic model
             count_consenting_crams = 0
@@ -155,6 +160,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     cols = [post_id,  "", tstamp, user_id, ptype, pid, slide, comment, num_upvotes, num_downvotes, edit_time, edit_user, edit_reason]
 
                     topic_name = lda.predict_topic(comment)  # assign LDA topic
+                    topic_distribution_scores = lda.topic_distribution_scores_list(comment)
                     is_help_request = is_help_topic(comment)  # determine if this is a help request
 
                     comment_mean_word_length = sum(len(word) for word in comment.split())/len(comment.split())  # mean word length of comment
@@ -196,6 +202,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     # TODO: print to_counts_string() later
                     line = cols
                     line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length, is_after]
+                    line += topic_distribution_scores
                     file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
