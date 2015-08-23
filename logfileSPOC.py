@@ -124,7 +124,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
             new_headers = cleaned_headers
             new_headers += ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS]
             new_headers += [utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP]
-            new_headers += ["mean_word_length", "median_word_length", utils.COL_COMMENTS_AFTER_PROMPT, utils.COL_COMMENTS_WEEK_AFTER]
+            new_headers += ["mean_word_length", "median_word_length", utils.COL_COMMENTS_AFTER_PROMPT, utils.COL_COMMENTS_WEEK_AFTER, "is_3_days_after_prompt"]
             for i in range(0, utils.NUM_LDA_TOPICS):  # topic headers for topic distribution scores
                 new_headers += ["topic_" + str(i)]
             new_headers += user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER)
@@ -204,7 +204,19 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                         is_week_after = "y"
                     elif is_on_posted(datestamp, first_prompt) > -1:  # this comment is X weeks BEFORE the first prompt
                         setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE, getattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE) + 1)
-                        is_week_after = "n"
+                        is_week_after = ""
+
+                    # count num comments X days after first prompt
+                    first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
+                    is_three_after = ""
+                    if first_prompt is None or len(str(first_prompt)) < 1:
+                        # no first prompt, nothing to change
+                        is_three_after = ""
+                    elif is_on_posted(datestamp, first_prompt, 3) > 0:  # this comment is X days AFTER first prompt
+                        is_three_after = "y"
+                        setattr(all_users[user_id], utils.COL_COMMENTS_DAYS_AFTER, getattr(all_users[user_id], utils.COL_COMMENTS_DAYS_AFTER) + 1)
+                    else:
+                        is_three_after = "n"
 
                     # LIWC - count the number of positive/negative words in the comment
                     num_positive, num_negative, num_comment_words = sentiment.count_sentiments(comment)
@@ -218,7 +230,9 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     dict_ld = dict(utils.lecture_dates)
                     # TODO: print to_counts_string() later
                     line = cols
-                    line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length, is_after, is_week_after]
+                    line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id)))]
+                    line += [num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length]
+                    line += [is_after, is_week_after, is_three_after]
                     line += topic_distribution_scores
                     file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
 
@@ -349,17 +363,17 @@ def is_near_posted(comment_date, lecture_id, num_weeks=utils.WEEK_THRESHOLD):
         print("ERROR:: logfileSPOC.is_near_posted(): Cannot process date: " + comment_date)
         return False
 
-def is_on_posted(comment_date, target_date, num_weeks=1):
+def is_on_posted(comment_date, target_date, num_days=7):
     """
     Determine if given date is num_weeks before (0), num_weeks after (1),
     or more than 1 week (-1) from the first prompt date (target_date)
     :param comment_date: date to check if it's in range
     :param target_date: target date we're checking against
-    :param num_weeks: number of weeks comment must be posted to lecture within
+    :param num_days: number of days comment must be posted within from target_date
     :return: -1 if more than num_weeks away, 0 if before, 1 if on or after
     """
-    before_deadline = target_date - datetime.timedelta(weeks=num_weeks)
-    after_deadline = target_date + datetime.timedelta(weeks=num_weeks)
+    before_deadline = target_date - datetime.timedelta(days=num_days)
+    after_deadline = target_date + datetime.timedelta(days=num_days)
 
     if comment_date is not None:
         if target_date.date() <= comment_date.date() <= after_deadline.date():  # after target date
