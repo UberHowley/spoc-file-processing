@@ -122,7 +122,9 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
             new_headers = cleaned_headers
-            new_headers += ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS, utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP, "mean_word_length", "median_word_length", utils.COL_COMMENTS_AFTER_PROMPT]
+            new_headers += ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS]
+            new_headers += [utils.LIWC_POSITIVE, utils.LIWC_NEGATIVE, utils.COL_LDA, utils.COL_HELP]
+            new_headers += ["mean_word_length", "median_word_length", utils.COL_COMMENTS_AFTER_PROMPT, utils.COL_COMMENTS_WEEK_AFTER]
             for i in range(0, utils.NUM_LDA_TOPICS):  # topic headers for topic distribution scores
                 new_headers += ["topic_" + str(i)]
             new_headers += user.UserSPOC.get_headers(utils.DELIMITER).split(utils.DELIMITER)
@@ -182,12 +184,27 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     if first_prompt is None or len(str(first_prompt)) < 1:
                         # no first prompt, nothing to change
                         setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, "")
+                        setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, "")
                     elif first_prompt <= datestamp:  # this comment is after the first prompt
                         setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_AFTER_PROMPT) + 1)
                         is_after = "y"
                     elif first_prompt > datestamp:  # this comment is before the first prompt
                         setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_BEFORE_PROMPT) + 1)
                         is_after = "n"
+
+                    # count num comments X weeks before and after first prompt
+                    first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
+                    is_week_after = ""
+                    if first_prompt is None or len(str(first_prompt)) < 1:
+                        # no first prompt, nothing to change
+                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER, "")
+                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE, "")
+                    elif is_on_posted(datestamp, first_prompt) > 0:  # this comment is X weeks AFTER first prompt
+                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER, getattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER) + 1)
+                        is_week_after = "y"
+                    elif is_on_posted(datestamp, first_prompt) > -1:  # this comment is X weeks BEFORE the first prompt
+                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE, getattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE) + 1)
+                        is_week_after = "n"
 
                     # LIWC - count the number of positive/negative words in the comment
                     num_positive, num_negative, num_comment_words = sentiment.count_sentiments(comment)
@@ -201,7 +218,7 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                     dict_ld = dict(utils.lecture_dates)
                     # TODO: print to_counts_string() later
                     line = cols
-                    line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length, is_after]
+                    line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id))), num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length, is_after, is_week_after]
                     line += topic_distribution_scores
                     file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
 
@@ -310,7 +327,7 @@ def is_during_experiment(comment_date, first_day=utils.CONST_FIRST_DAY, last_day
 def is_near_posted(comment_date, lecture_id, num_weeks=utils.WEEK_THRESHOLD):
     """
     Determine if given date is within num_weeks of lecture_id
-    :param instance_date: date to check if it's in range
+    :param comment_date: date to check if it's in range
     :param lecture_id: id number of lecture the comment date belongs to
     :param num_weeks: number of weeks comment must be posted to lecture within
     :return: True if given date is in our restricted time range
@@ -331,6 +348,29 @@ def is_near_posted(comment_date, lecture_id, num_weeks=utils.WEEK_THRESHOLD):
     else:
         print("ERROR:: logfileSPOC.is_near_posted(): Cannot process date: " + comment_date)
         return False
+
+def is_on_posted(comment_date, target_date, num_weeks=1):
+    """
+    Determine if given date is num_weeks before (0), num_weeks after (1),
+    or more than 1 week (-1) from the first prompt date (target_date)
+    :param comment_date: date to check if it's in range
+    :param target_date: target date we're checking against
+    :param num_weeks: number of weeks comment must be posted to lecture within
+    :return: -1 if more than num_weeks away, 0 if before, 1 if on or after
+    """
+    before_deadline = target_date - datetime.timedelta(weeks=num_weeks)
+    after_deadline = target_date + datetime.timedelta(weeks=num_weeks)
+
+    if comment_date is not None:
+        if target_date.date() <= comment_date.date() <= after_deadline.date():  # after target date
+            return 1
+        elif before_deadline.date() <= comment_date.date() < target_date.date():  # before target date
+            return 0
+        else:  # Not in given date range
+            return -1
+    else:
+        print("ERROR:: logfileSPOC.is_on_posted(): Cannot process date: " + comment_date)
+        return -1
 
 def days_after(comment_date, lecture_id):
     """

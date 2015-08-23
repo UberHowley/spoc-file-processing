@@ -39,6 +39,8 @@ class UserSPOC(object):
     # num comments before/after first prompt
     comments_before_prompt = 0
     comments_after_prompt = 0
+    comments_week_before_prompt = 0  # num comments one week before/after first prompt
+    comments_week_after_prompt = 0
 
     def __init__(self, uid, nc, vc, pc, np, up, down, assi, asl, tl, e, mg, exc, fpd):
         """
@@ -140,6 +142,8 @@ class UserSPOC(object):
         line += delimiter + str(self.comment_length)
         line += delimiter + str(self.comments_before_prompt)
         line += delimiter + str(self.comments_after_prompt)
+        line += delimiter + str(self.comments_week_before_prompt)
+        line += delimiter + str(self.comments_week_after_prompt)
         return line
 
     @staticmethod
@@ -174,5 +178,7 @@ class UserSPOC(object):
         line += delimiter + utils.COMMENT_CHARS
         line += delimiter + utils.COL_COMMENTS_BEFORE_PROMPT
         line += delimiter + utils.COL_COMMENTS_AFTER_PROMPT
+        line += delimiter + utils.COL_COMMENTS_WEEK_BEFORE
+        line += delimiter + utils.COL_COMMENTS_WEEK_AFTER
         return line
 

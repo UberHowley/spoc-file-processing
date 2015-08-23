@@ -87,6 +87,8 @@ COL_FIRST_PROMPT_DATE = "first_prompt_date"
 
 COL_COMMENTS_AFTER_PROMPT = "comments_after_prompt"
 COL_COMMENTS_BEFORE_PROMPT = "comments_before_prompt"
+COL_COMMENTS_WEEK_BEFORE = "comments_week_before_prompt"
+COL_COMMENTS_WEEK_AFTER = "comments_week_after_prompt"
 
 COL_ANY_VOTE = "hasAnyVoting"
 COL_NEG_VOTE = "negativeVoting"
