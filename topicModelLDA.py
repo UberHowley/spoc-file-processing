@@ -76,11 +76,19 @@ class LDAtopicModel(object):
                 i += 1
         else:
             print("- Begin guessing topics -")
+            f = open('lda_topics.csv', 'w')
+            i = 0
+
             # naming each topic based on top _n_ matching words
             for topic in self.lda.show_topics(self.number_of_topics):
-                name = self.get_topic_name(topic, 2)
+                name = self.get_topic_name(topic, 3)
                 print("\t- " + name + " = " + topic)
                 self.topic_names.append(name)
+
+                # file output
+                f.write("topic_" + str(i) + ", " + name + ", " + topic + "\n")
+                i += 1
+            f.close()
         print("Done creating LDA topic model")
 
     def get_topic_name(self, topic, num_words):
