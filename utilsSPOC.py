@@ -10,6 +10,8 @@ import datetime
 # date/time related stuff
 CONST_FIRST_DAY = datetime.date(2015, 2, 7)  # approximate day experiment began
 CONST_LAST_DAY = datetime.date(2015, 5, 8)  # last day of classes + 1 week
+CONST_MIDTERM = datetime.date(2015, 3, 2)  # date of midterm
+
 
 # constants
 FILE_CONDITIONS = "150512_spoc_full_data"
@@ -18,6 +20,7 @@ FILE_PROMPTS = "150512_spoc_prompts"
 PROMPT_MOD = FILE_PROMPTS + "_mod"
 MOD_FILE = FILE_CONDITIONS + "_mod"
 LDA_FILE = FILE_POSTS + "_lda"
+MT_FILE = "_mid"  # file extension for second half of class only
 FILE_EXTENSION = ".csv"
 DELIMITER = ","
 NUM_LDA_TOPICS = 15

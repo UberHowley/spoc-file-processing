@@ -9,6 +9,7 @@ from topicModelLDA import LDAtopicModel as ldat
 import liwc as liwc
 
 # variables
+is_only_second_half = True
 all_users = {}  # uid -> UserSPOC: all users in the file and their conditions
 list_sentences = []  # a list of bag of words from all comments
 
@@ -20,7 +21,11 @@ def run():
     process_prompts()
 
     # writing the users file to CSV
-    modfile_out = open(utils.MOD_FILE + utils.FILE_EXTENSION, 'w')
+    filename = utils.MOD_FILE + utils.FILE_EXTENSION
+    if is_only_second_half:
+        filename = utils.MOD_FILE + utils.MT_FILE + utils.FILE_EXTENSION
+
+    modfile_out = open(filename, 'w')
     modfile_out.write(user.UserSPOC.get_headers(utils.DELIMITER) + '\n')
 
     for usr in all_users:
@@ -119,7 +124,10 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
         # load up LIWC libraries for quick sentiment analysis
         sentiment = liwc.liwc()
 
-        with open(utils.LDA_FILE+utils.FILE_EXTENSION, 'w', encoding="utf8") as csvout:
+        filename = utils.LDA_FILE+utils.FILE_EXTENSION
+        if is_only_second_half:
+            filename = utils.LDA_FILE + utils.MT_FILE + utils.FILE_EXTENSION
+        with open(filename, 'w', encoding="utf8") as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
             new_headers = cleaned_headers
             new_headers += ["num_days_after_post", "lecture_post_date", "lecture_week_num", utils.COMMENT_WORDS, utils.COMMENT_CHARS]
@@ -171,70 +179,72 @@ def process_comments(filename=utils.FILE_POSTS+utils.FILE_EXTENSION):
                         word_lengths.append(len(word))
                     comment_median_word_length = median(word_lengths)  # median word length of comment
 
-                    # add this to our count of legitimate/punctual comments
-                    setattr(all_users[user_id], utils.COL_NUM_LEGIT_COMMENTS, getattr(all_users[user_id],utils.COL_NUM_LEGIT_COMMENTS) + 1)
+                    # only process if we're including all valid dates
+                    if not is_only_second_half or (is_only_second_half and datestamp.date() > utils.CONST_MIDTERM):
+                        # add this to our count of legitimate/punctual comments
+                        setattr(all_users[user_id], utils.COL_NUM_LEGIT_COMMENTS, getattr(all_users[user_id],utils.COL_NUM_LEGIT_COMMENTS) + 1)
 
-                    # add this help request to our counts of student help requests
-                    if is_help_request and all_users.get(user_id, None) is not None:
-                        setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
+                        # add this help request to our counts of student help requests
+                        if is_help_request and all_users.get(user_id, None) is not None:
+                            setattr(all_users[user_id], utils.COL_HELP_REQS, getattr(all_users[user_id],utils.COL_HELP_REQS) + 1)
 
-                    # count num comments before and after first prompt
-                    first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
-                    is_after = ""
-                    if first_prompt is None or len(str(first_prompt)) < 1:
-                        # no first prompt, nothing to change
-                        setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, "")
-                        setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, "")
-                    elif first_prompt <= datestamp:  # this comment is after the first prompt
-                        setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_AFTER_PROMPT) + 1)
-                        is_after = "y"
-                    elif first_prompt > datestamp:  # this comment is before the first prompt
-                        setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_BEFORE_PROMPT) + 1)
-                        is_after = "n"
+                        # count num comments before and after first prompt
+                        first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
+                        is_after = ""
+                        if first_prompt is None or len(str(first_prompt)) < 1:
+                            # no first prompt, nothing to change
+                            setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, "")
+                            setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, "")
+                        elif first_prompt <= datestamp:  # this comment is after the first prompt
+                            setattr(all_users[user_id], utils.COL_COMMENTS_AFTER_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_AFTER_PROMPT) + 1)
+                            is_after = "y"
+                        elif first_prompt > datestamp:  # this comment is before the first prompt
+                            setattr(all_users[user_id], utils.COL_COMMENTS_BEFORE_PROMPT, getattr(all_users[user_id],utils.COL_COMMENTS_BEFORE_PROMPT) + 1)
+                            is_after = "n"
 
-                    # count num comments X weeks before and after first prompt
-                    first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
-                    is_week_after = ""
-                    if first_prompt is None or len(str(first_prompt)) < 1:
-                        # no first prompt, nothing to change
-                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER, "")
-                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE, "")
-                    elif is_on_posted(datestamp, first_prompt) > 0:  # this comment is X weeks AFTER first prompt
-                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER, getattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER) + 1)
-                        is_week_after = "y"
-                    elif is_on_posted(datestamp, first_prompt) > -1:  # this comment is X weeks BEFORE the first prompt
-                        setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE, getattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE) + 1)
+                        # count num comments X weeks before and after first prompt
+                        first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
                         is_week_after = ""
+                        if first_prompt is None or len(str(first_prompt)) < 1:
+                            # no first prompt, nothing to change
+                            setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER, "")
+                            setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE, "")
+                        elif is_on_posted(datestamp, first_prompt) > 0:  # this comment is X weeks AFTER first prompt
+                            setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER, getattr(all_users[user_id], utils.COL_COMMENTS_WEEK_AFTER) + 1)
+                            is_week_after = "y"
+                        elif is_on_posted(datestamp, first_prompt) > -1:  # this comment is X weeks BEFORE the first prompt
+                            setattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE, getattr(all_users[user_id], utils.COL_COMMENTS_WEEK_BEFORE) + 1)
+                            is_week_after = ""
 
-                    # count num comments X days after first prompt
-                    first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
-                    is_three_after = ""
-                    if first_prompt is None or len(str(first_prompt)) < 1:
-                        # no first prompt, nothing to change
+                        # count num comments X days after first prompt
+                        first_prompt = getattr(all_users[user_id], utils.COL_FIRST_PROMPT_DATE, None)
                         is_three_after = ""
-                    elif is_on_posted(datestamp, first_prompt, 3) > 0:  # this comment is X days AFTER first prompt
-                        is_three_after = "y"
-                        setattr(all_users[user_id], utils.COL_COMMENTS_DAYS_AFTER, getattr(all_users[user_id], utils.COL_COMMENTS_DAYS_AFTER) + 1)
-                    else:
-                        is_three_after = "n"
+                        if first_prompt is None or len(str(first_prompt)) < 1:
+                            # no first prompt, nothing to change
+                            is_three_after = ""
+                        elif is_on_posted(datestamp, first_prompt, 3) > 0:  # this comment is X days AFTER first prompt
+                            is_three_after = "y"
+                            setattr(all_users[user_id], utils.COL_COMMENTS_DAYS_AFTER, getattr(all_users[user_id], utils.COL_COMMENTS_DAYS_AFTER) + 1)
+                        else:
+                            is_three_after = "n"
 
-                    # LIWC - count the number of positive/negative words in the comment
-                    num_positive, num_negative, num_comment_words = sentiment.count_sentiments(comment)
-                    # LIWC - add these counts to our student user
-                    if all_users.get(user_id, None) is not None:
-                        setattr(all_users[user_id], utils.LIWC_POSITIVE, getattr(all_users[user_id], utils.LIWC_POSITIVE) + num_positive)
-                        setattr(all_users[user_id], utils.LIWC_NEGATIVE, getattr(all_users[user_id], utils.LIWC_NEGATIVE) + num_negative)
-                        setattr(all_users[user_id], utils.COMMENT_CHARS, getattr(all_users[user_id], utils.COMMENT_CHARS) + len(comment))
-                        setattr(all_users[user_id], utils.COMMENT_WORDS, getattr(all_users[user_id], utils.COMMENT_WORDS) + num_comment_words)
+                        # LIWC - count the number of positive/negative words in the comment
+                        num_positive, num_negative, num_comment_words = sentiment.count_sentiments(comment)
+                        # LIWC - add these counts to our student user
+                        if all_users.get(user_id, None) is not None:
+                            setattr(all_users[user_id], utils.LIWC_POSITIVE, getattr(all_users[user_id], utils.LIWC_POSITIVE) + num_positive)
+                            setattr(all_users[user_id], utils.LIWC_NEGATIVE, getattr(all_users[user_id], utils.LIWC_NEGATIVE) + num_negative)
+                            setattr(all_users[user_id], utils.COMMENT_CHARS, getattr(all_users[user_id], utils.COMMENT_CHARS) + len(comment))
+                            setattr(all_users[user_id], utils.COMMENT_WORDS, getattr(all_users[user_id], utils.COMMENT_WORDS) + num_comment_words)
 
-                    dict_ld = dict(utils.lecture_dates)
-                    # TODO: print to_counts_string() later
-                    line = cols
-                    line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id)))]
-                    line += [num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length]
-                    line += [is_after, is_week_after, is_three_after]
-                    line += topic_distribution_scores
-                    file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
+                        dict_ld = dict(utils.lecture_dates)
+                        # TODO: print to_counts_string() later
+                        line = cols
+                        line += [days_after(datestamp, parent_id), str(dict_ld[int(parent_id)]), str([y[0] for y in utils.lecture_dates].index(int(parent_id)))]
+                        line += [num_comment_words, len(comment), num_positive, num_negative, topic_name, str(is_help_request), comment_mean_word_length, comment_median_word_length]
+                        line += [is_after, is_week_after, is_three_after]
+                        line += topic_distribution_scores
+                        file_out.writerow(line + all_users[user_id].to_const_string(utils.DELIMITER).split(utils.DELIMITER))
 
         csvfile.close()
 
@@ -252,7 +262,11 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
         headers = next(rows)  # skip first header row
         cleaned_headers = [s.replace(' ', '') for s in headers]  # removing spaces
         cleaned_headers += ["recip0", "recip1"]  # splitting recipients into separate columns
-        with open(utils.PROMPT_MOD+utils.FILE_EXTENSION, 'w') as csvout:
+
+        filename = utils.PROMPT_MOD+utils.FILE_EXTENSION
+        if is_only_second_half:
+            filename = utils.PROMPT_MOD + utils.MT_FILE + utils.FILE_EXTENSION
+        with open(filename, 'w') as csvout:
             file_out = csv.writer(csvout, delimiter=utils.DELIMITER,quotechar='\"', quoting=csv.QUOTE_MINIMAL, lineterminator='\n')
             file_out.writerow(cleaned_headers)
 
@@ -272,19 +286,21 @@ def process_prompts(filename=utils.FILE_PROMPTS+utils.FILE_EXTENSION):
                 author = array_line[cleaned_headers.index(utils.COL_AUTHOR)]
                 """
 
-                # removing non-consenting prompt recipients
-                consenting = []
-                for recip in recipients:
-                    recip = recip.replace(' ', '')
-                    if is_consenting_student(recip):
-                        consenting.append(recip)
-                    else:
-                        print("Warning: recipient of prompt (" + str(recip) + ") from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " not consenting.")
-                        consenting.append("non_consent")
-                consenting.sort()
-                array_line[cleaned_headers.index(utils.COL_RECIPIENTS)] = utils.DELIMITER.join(consenting)
-                array_line += consenting
-                file_out.writerow(array_line)  # only writing consenting students' data
+                # only process/write if during valid dates
+                if not is_only_second_half or (is_only_second_half and get_timestamp(timestamp).date() > utils.CONST_MIDTERM):
+                    # removing non-consenting prompt recipients
+                    consenting = []
+                    for recip in recipients:
+                        recip = recip.replace(' ', '')
+                        if is_consenting_student(recip):
+                            consenting.append(recip)
+                        else:
+                            print("Warning: recipient of prompt (" + str(recip) + ") from " + utils.PROMPT_MOD+utils.FILE_EXTENSION + " not consenting.")
+                            consenting.append("non_consent")
+                    consenting.sort()
+                    array_line[cleaned_headers.index(utils.COL_RECIPIENTS)] = utils.DELIMITER.join(consenting)
+                    array_line += consenting
+                    file_out.writerow(array_line)  # only writing consenting students' data
         csvfile.close()
     print("Done processing " + filename)
 
