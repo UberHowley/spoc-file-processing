@@ -82,24 +82,24 @@ class LDAtopicModel(object):
             # naming each topic based on top _n_ matching words
             for topic in self.lda.show_topics(self.number_of_topics):
                 name = self.get_topic_name(topic, 3)
-                print("\t- " + name + " = " + topic)
+                print("\t- " + name + " = " + topic[1])
                 self.topic_names.append(name)
 
                 # file output
-                f.write("topic_" + str(i) + ", " + name + ", " + topic + "\n")
+                f.write("topic_" + str(i) + ", " + name + ", " + topic[1] + "\n")
                 i += 1
             f.close()
         print("Done creating LDA topic model")
 
     def get_topic_name(self, topic, num_words):
         # 0.025*can + 0.023*time + 0.020*two + 0.020*work + 0.018*may + 0.017*transaction...
-        all_words = topic.split('+')
+        all_words = topic[1].split('+')
         if num_words > len(all_words):
             num_words = len(all_words)
 
         name = ""
         for i in range(0, num_words):
-            name += all_words[i][topic.index('*')+1:].strip()
+            name += all_words[i][topic[1].index('*')+1:].strip()
         return name
 
     def topic_distribution_scores(self, document):
